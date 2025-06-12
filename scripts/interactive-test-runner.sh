@@ -268,7 +268,7 @@ Please: 1. Identify the performance problems 2. Provide an optimized implementat
 90
 
     # CT-03: Bug Fixing
-    local buggy_code=$(read_sample_file "test-data/sample-code/buggy-stack.py")
+    local buggy_code=$(read_sample_file "test-data/sample-code/code-samples.py" | sed -n '/class BuggyStack/,/return len(self.items) > 0/p')
     run_test "ct03" "${model}" "coding" "Bug Fixing" \
 "The following Python code has several bugs. Find and fix all issues:
 
@@ -278,7 +278,7 @@ Please: 1. Identify all bugs in the code 2. Provide the corrected implementation
 90
 
     # CT-04: Code Review Analysis
-    local undocumented_code=$(read_sample_file "test-data/sample-code/code-samples.py" | sed -n '/def mystery_function/,/return result/p')
+    local undocumented_code=$(read_sample_file "test-data/sample-code/code-samples.py" | sed -n '/def undocumented_function/,/return result/p')
     run_test "ct04" "${model}" "coding" "Code Review Analysis" \
 "Please review this function and provide suggestions for improvement:
 
