@@ -11,6 +11,7 @@ This framework provides:
 - **Automated Execution** with timing and performance metrics
 - **JSON-based Results** for programmatic analysis
 - **Comprehensive Reporting** with manual evaluation guidelines
+- **Automated Qualitative Evaluation** - AI-powered scoring using Gemini 2.5 Flash Preview
 
 ## Quick Start
 
@@ -19,6 +20,34 @@ This framework provides:
 - At least one model pulled (e.g., `ollama pull qwen2.5-coder:7b`)
 - `jq` for JSON processing (`brew install jq` on macOS)
 - `bc` for calculations (usually pre-installed on Unix systems)
+- Python 3.8+ (for qualitative evaluation features)
+
+### Environment Setup
+
+1. **Copy environment configuration:**
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Configure API keys in `.env`:**
+   ```bash
+   # Edit .env file with your actual API keys
+   # Required for automated qualitative evaluation:
+   GOOGLE_API_KEY=your-google-api-key-here
+   ```
+
+   Get your Google API key from: [Google AI Studio](https://makersuite.google.com/app/apikey)
+
+3. **Install Python dependencies (optional - for qualitative evaluation):**
+   ```bash
+   # Using uv (recommended)
+   uv venv
+   source .venv/bin/activate  # or your preferred activation method
+   uv pip install -r requirements.txt
+   
+   # Or using pip
+   pip install -r requirements.txt
+   ```
 
 ### Run Interactive Tests
 ```bash
@@ -33,9 +62,18 @@ The script will prompt you to:
 
 ### Analyze Results
 ```bash
-# Generate comprehensive analysis report
+# Standard quantitative analysis
 ./scripts/analyze-results.sh
+
+# Enhanced analysis with automated qualitative evaluation (requires GOOGLE_API_KEY)
+./scripts/analyze-results.sh --with-qualitative-eval
 ```
+
+**Qualitative Evaluation Features:**
+- Automated scoring using Gemini 2.5 Flash Preview
+- Structured 0-10 point scales for Correctness, Completeness, and Quality
+- Cost-effective: ~$0.003 per test evaluation (~$0.036 for full 12-test suite)
+- Consistent evaluation against the detailed rubrics in EVALUATION-METHODOLOGY.md
 
 ## Project Structure
 
@@ -113,6 +151,7 @@ These tests evaluate data processing and business intelligence using any model:
 - `outputs/dt01-dt06_TIMESTAMP.out` - Raw model responses for data tests
 - `results/ct01_TIMESTAMP.json` - Structured results with metrics
 - `reports/analysis_TIMESTAMP.md` - Comprehensive analysis report
+- `reports/qualitative_TIMESTAMP.json` - Automated qualitative scores (when using --with-qualitative-eval)
 
 ### 3. Model Selection Strategy
 

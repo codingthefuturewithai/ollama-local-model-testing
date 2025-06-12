@@ -1,0 +1,16 @@
+Ollama Interactive Testing Framework - Test Summary
+Test Run ID: interactive_mistral_nemo_12b_data_20250612_003759
+Model: mistral-nemo:12b
+Category: data
+Execution Date: Thu Jun 12 00:41:07 EDT 2025
+
+Files Generated:
+- Output files: outputs/*_20250612_003759.out
+- Result files: results/*_20250612_003759.json
+- Log file: results/test_execution_20250612_003759.log
+
+Next Steps:
+1. Review output files for model responses
+2. Run analysis script: ./scripts/analyze-results.sh
+3. Evaluate qualitative metrics manually
+4. Generate comparative analysis report

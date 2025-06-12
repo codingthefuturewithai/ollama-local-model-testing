@@ -487,7 +487,7 @@ main() {
     echo ""
     echo -e "${YELLOW}Next Steps:${NC}"
     echo "1. Review output files in ${OUTPUT_DIR}/ for model responses"
-    echo "2. Run analysis: ${CYAN}./scripts/analyze-results.sh${NC}"
+    echo -e "2. Run analysis: ${CYAN}./scripts/analyze-results.sh${NC}"
     echo "3. Evaluate qualitative metrics manually"
     echo "4. Generate comparative analysis report"
 }
