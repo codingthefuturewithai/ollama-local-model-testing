@@ -398,7 +398,7 @@ if [[ "$QUALITATIVE_EVAL" == true ]]; then
 - **Average Quality:** ${avg_quality}/10
 - **Tests Evaluated:** ${tests_evaluated}
 
-**Detailed Evaluation:** See \`$(basename "$qualitative_output_file")\` for complete analysis with reasoning.
+**Detailed Evaluation:** See [$(basename "$qualitative_output_file")](../reports/$(basename "$qualitative_output_file")) for complete analysis with reasoning.
 "
             fi
         else
