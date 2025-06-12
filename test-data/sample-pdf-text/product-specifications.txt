@@ -1,0 +1,39 @@
+PRODUCT SPECIFICATION DOCUMENT
+TechStore Product Catalog - Q1 2024
+
+WIRELESS HEADPHONES (SKU: WH-2024-001)
+Technical Specifications:
+- Driver Size: 40mm dynamic drivers
+- Frequency Response: 20Hz - 20kHz  
+- Battery Life: 30 hours continuous playback
+- Charging: USB-C fast charging (2 hours full charge)
+- Connectivity: Bluetooth 5.2, 3.5mm aux backup
+- Weight: 285 grams
+- Colors: Black, White, Navy Blue
+- Price: $89.99 MSRP
+
+MARKET ANALYSIS:
+The wireless headphone market continues robust growth, with consumer preference shifting toward longer battery life and quick charging capabilities. Our model targets the mid-premium segment, competing directly with Sony WH-CH720N ($149.99) and Audio-Technica ATH-M50xBT2 ($199.00).
+
+SALES PERFORMANCE:
+January 2024 sales data shows strong adoption:
+- Units sold: 156 pairs
+- Revenue contribution: $14,039.44
+- Customer rating: 4.7/5 stars (based on 89 reviews)
+- Return rate: 2.1% (industry average: 8.3%)
+
+CUSTOMER FEEDBACK HIGHLIGHTS:
+Positive: "Excellent battery life", "Comfortable for long wear", "Great value for money"
+Areas for improvement: "Could use better noise cancellation", "Carrying case quality"
+
+ERGONOMIC CHAIR (SKU: EC-2024-001)  
+Technical Specifications:
+- Seat Height: Adjustable 17"-21"
+- Weight Capacity: 300 lbs
+- Lumbar Support: Adjustable mesh back
+- Armrests: 4D adjustable (height, width, angle, depth)
+- Base: 5-point aluminum base with smooth-rolling casters
+- Warranty: 5 years manufacturer warranty
+- Price: $299.99 MSRP
+
+This product targets the remote work market, which expanded 42% since 2020. Corporate bulk orders represent 60% of sales volume.

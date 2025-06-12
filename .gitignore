@@ -1,0 +1,57 @@
+# Ollama Model Testing - Git Ignore Rules
+
+# Test Outputs (Generated Data)
+outputs/*.out
+outputs_clean/*.out
+
+# Generated Reports and Results
+reports/*.md
+reports/*.html
+reports/*.json
+results/*.json
+
+# Logs and Temporary Files
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Editor and IDE Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python Cache (if any Python scripts are added)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Node Modules (if any Node.js tools are added)
+node_modules/
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Backup Files
+*.bak
+*.backup
+
+# System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Keep Directory Structure (allow empty directories to be tracked)
+!outputs/.gitkeep
+!outputs_clean/.gitkeep
+!reports/.gitkeep
+!results/.gitkeep

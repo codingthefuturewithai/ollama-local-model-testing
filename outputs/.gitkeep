@@ -1,0 +1,2 @@
+# This file ensures the outputs directory is tracked by git
+# Actual .out files are ignored, but the directory structure is preserved

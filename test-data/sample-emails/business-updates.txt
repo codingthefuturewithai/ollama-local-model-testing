@@ -1,0 +1,45 @@
+Subject: Quarterly Sales Performance Review
+From: sales.director@techstore.com
+To: team@techstore.com
+Date: January 20, 2024 9:00 AM
+
+Team,
+
+Q4 2023 performance summary:
+- Total orders: 1,247 (15% increase from Q3)
+- Revenue: $387,432 (22% increase)  
+- Top product categories: Office accessories (45%), Audio equipment (28%), Computing peripherals (27%)
+- Customer satisfaction: 4.6/5.0 average rating
+
+Notable trends:
+- Wireless headphones demand increased 35%
+- Ergonomic furniture orders up 50% 
+- Bulk corporate orders now represent 40% of revenue
+
+Q1 2024 focus areas:
+- Expand mechanical keyboard selection
+- Launch referral program for corporate clients
+- Improve shipping speed for West Coast customers
+
+Great work everyone!
+
+Jennifer
+Sales Director
+
+---
+
+Subject: Re: Customer Complaint - Order ORD-2024-004
+From: customerservice@techstore.com
+To: sales.director@techstore.com  
+Date: January 19, 2024 11:30 AM
+
+Jennifer,
+
+FYI - Emily Davis (emily.davis@startup.io) requested cancellation of order ORD-2024-004 (Mechanical Keyboard, $159.99). 
+
+Reason: Found better price elsewhere ($139.99 on competitor site)
+
+This is the 3rd price-related cancellation this week. Should we consider price matching policy?
+
+Thanks,
+Customer Service Team
