@@ -10,6 +10,7 @@ set -e
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 OUTPUT_DIR="outputs"
 RESULTS_DIR="results"
+REPORTS_DIR="reports"
 LOG_FILE="${RESULTS_DIR}/test_execution_${TIMESTAMP}.log"
 CONFIG_LOADER="scripts/config_loader.py"
 
@@ -23,7 +24,7 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Create directories
-mkdir -p "${OUTPUT_DIR}" "${RESULTS_DIR}"
+mkdir -p "${OUTPUT_DIR}" "${RESULTS_DIR}" "${REPORTS_DIR}"
 
 # Logging function
 log() {
@@ -398,17 +399,52 @@ main() {
     echo "" >> "${summary_file}"
     echo "Next Steps:" >> "${summary_file}"
     echo "1. Review output files for model responses" >> "${summary_file}"
-    echo "2. Run analysis script: ./scripts/analyze-results.sh" >> "${summary_file}"
+    echo "2. Analysis report automatically generated below" >> "${summary_file}"
     echo "3. Evaluate qualitative metrics manually" >> "${summary_file}"
     echo "4. Generate comparative analysis report" >> "${summary_file}"
 
     echo -e "${GREEN}[INFO]${NC} Summary report generated: ${summary_file}"
     echo ""
-    echo -e "${YELLOW}Next Steps:${NC}"
-    echo "1. Review output files in ${OUTPUT_DIR}/ for model responses"
-    echo -e "2. Run analysis: ${CYAN}./scripts/analyze-results.sh${NC}"
-    echo "3. Evaluate qualitative metrics manually"
-    echo "4. Generate comparative analysis report"
+    
+    # Clean output files for better readability
+    echo -e "${BLUE}[INFO]${NC} Cleaning output files..."
+    log "Cleaning output files with timestamp ${TIMESTAMP}"
+    
+    if ./scripts/clean-outputs.sh "${TIMESTAMP}" 2>/dev/null; then
+        echo -e "${GREEN}[SUCCESS]${NC} Output files cleaned and available in outputs_clean/"
+        log "Output cleaning completed successfully"
+    else
+        echo -e "${YELLOW}[WARNING]${NC} Output cleaning failed, raw files still available"
+        log "Output cleaning failed, continuing with raw files"
+    fi
+    echo ""
+    
+    # Auto-generate analysis report
+    echo -e "${BLUE}[INFO]${NC} Generating analysis report..."
+    log "Running automated analysis"
+    
+    # Run the analysis script and capture the report file path
+    if ./scripts/analyze-results.sh 2>/dev/null; then
+        # Find the most recent analysis report
+        local latest_analysis=$(ls -t "${REPORTS_DIR}"/analysis_*.md 2>/dev/null | head -n 1)
+        if [[ -f "$latest_analysis" ]]; then
+            local absolute_path=$(cd "$(dirname "$latest_analysis")" && pwd)/$(basename "$latest_analysis")
+            echo -e "${GREEN}[SUCCESS]${NC} Analysis report generated"
+            echo ""
+            echo -e "${YELLOW}📊 Analysis Report Ready:${NC}"
+            echo -e "${CYAN}file://${absolute_path}${NC}"
+            echo ""
+            echo -e "${BLUE}Additional Options:${NC}"
+            echo -e "• Re-run analysis: ${CYAN}./scripts/analyze-results.sh${NC}"
+            echo -e "• Qualitative evaluation: ${CYAN}./scripts/analyze-results.sh --with-qualitative-eval${NC}"
+        else
+            echo -e "${YELLOW}[WARNING]${NC} Analysis completed but report file not found"
+            echo -e "Manual analysis: ${CYAN}./scripts/analyze-results.sh${NC}"
+        fi
+    else
+        echo -e "${YELLOW}[WARNING]${NC} Analysis script encountered issues"
+        echo -e "Manual analysis: ${CYAN}./scripts/analyze-results.sh${NC}"
+    fi
 }
 
 # Run main function

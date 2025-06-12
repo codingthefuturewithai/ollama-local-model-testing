@@ -7,13 +7,17 @@
 set -e
 
 # Parse command line arguments
-QUALITATIVE_EVAL=false
+QUALITATIVE_EVAL=true  # Default to true now
 HELP=false
 
 while [[ $# -gt 0 ]]; do
     case $1 in
         --with-qualitative-eval)
             QUALITATIVE_EVAL=true
+            shift
+            ;;
+        --skip-qualitative-eval)
+            QUALITATIVE_EVAL=false
             shift
             ;;
         --help|-h)
@@ -33,15 +37,16 @@ if [[ "$HELP" == true ]]; then
     echo "Usage: $0 [OPTIONS]"
     echo ""
     echo "Options:"
-    echo "  --with-qualitative-eval    Enable automated qualitative evaluation using Gemini 2.5 Flash Preview"
+    echo "  --skip-qualitative-eval    Skip automated qualitative evaluation (faster, no API required)"
+    echo "  --with-qualitative-eval    Force enable qualitative evaluation (default behavior)"
     echo "  --help, -h                 Show this help message"
     echo ""
     echo "Examples:"
-    echo "  $0                         Standard quantitative analysis only"
-    echo "  $0 --with-qualitative-eval Includes automated qualitative scores"
+    echo "  $0                         Full analysis with automated qualitative scores (default)"
+    echo "  $0 --skip-qualitative-eval Quantitative analysis only (no API key needed)"
     echo ""
     echo "Note: Qualitative evaluation requires Python dependencies and Google API key."
-    echo "      The Python script will guide you through setup if needed."
+    echo "      If API key is missing, the script will automatically fallback to basic analysis."
     exit 0
 fi
 
@@ -292,11 +297,20 @@ else
 fi
 echo "" >> "${report_file}"
 
-# Add evaluation process section
-cat >> "${report_file}" << 'EOF'
-## Quality Evaluation Process
+# Add evaluation process section with actual scores if available
+if [[ "$QUALITATIVE_EVAL" == true ]]; then
+    cat >> "${report_file}" << 'EOF'
+## Quality Evaluation Results
 
-### Step-by-Step Evaluation Guide
+### Automated Analysis
+*The following analysis was performed using Gemini 2.5 Flash Preview*
+
+EOF
+else
+    cat >> "${report_file}" << 'EOF'
+## Manual Quality Evaluation Guide
+
+### Step-by-Step Evaluation Process
 
 #### 1. Prepare for Evaluation
 - Run `./scripts/clean-outputs.sh` to generate cleaned output files
@@ -334,49 +348,51 @@ cat >> "${report_file}" << 'EOF'
 - Identify patterns in model performance
 - Document recommendations for model usage
 
-## Evaluation Template
-
-Copy this template to document your assessment:
-
-```
-Model: [MODEL_NAME]
-Category: [CATEGORY]
-Date: [DATE]
-
-Test Scores:
-- ct01/dt01: [1-10] - [brief note]
-- ct02/dt02: [1-10] - [brief note]
-- ct03/dt03: [1-10] - [brief note]
-- ct04/dt04: [1-10] - [brief note]
-- ct05/dt05: [1-10] - [brief note]
-- ct06/dt06: [1-10] - [brief note]
-
-Average Score: [X.X/10]
-Overall Rating: [Poor/Adequate/Good/Excellent]
-
-Strengths:
-- [Key strength 1]
-- [Key strength 2]
-
-Areas for Improvement:
-- [Issue 1]
-- [Issue 2]
-
-Recommendations:
-- [Usage recommendation]
-```
-
 EOF
+fi
 
-echo "### Output Files" >> "${report_file}"
+# Automatically clean output files before listing them
+echo -e "${BLUE}[INFO]${NC} Cleaning output files for better readability..."
+if ./scripts/clean-outputs.sh "${latest_timestamp}" 2>/dev/null; then
+    echo -e "${GREEN}[SUCCESS]${NC} Output files cleaned"
+    CLEAN_OUTPUTS_DIR="outputs_clean"
+    use_clean_outputs=true
+else
+    echo -e "${YELLOW}[WARNING]${NC} Output cleaning failed, using raw files"
+    CLEAN_OUTPUTS_DIR="${OUTPUTS_DIR}"
+    use_clean_outputs=false
+fi
+
+echo "" >> "${report_file}"
+if [[ "$use_clean_outputs" == true ]]; then
+    echo "### Cleaned Output Files" >> "${report_file}"
+    echo "*Raw output files have been cleaned to remove terminal escape codes*" >> "${report_file}"
+    echo "" >> "${report_file}"
+else
+    echo "### Output Files" >> "${report_file}"
+fi
+
 output_count=0
-for output_file in "${OUTPUTS_DIR}"/*"${latest_timestamp}".out; do
-    if [[ -f "${output_file}" ]]; then
-        filename=$(basename "${output_file}")
-        echo "- \`${filename}\`" >> "${report_file}"
-        output_count=$((output_count + 1))
-    fi
-done
+if [[ "$use_clean_outputs" == true ]]; then
+    # List cleaned output files with clickable links
+    for output_file in "${CLEAN_OUTPUTS_DIR}"/*"${latest_timestamp}".out; do
+        if [[ -f "${output_file}" ]]; then
+            filename=$(basename "${output_file}")
+            echo "- [${filename}](../outputs_clean/${filename})" >> "${report_file}"
+            output_count=$((output_count + 1))
+        fi
+    done
+else
+    # List raw output files with clickable links
+    for output_file in "${OUTPUTS_DIR}"/*"${latest_timestamp}".out; do
+        if [[ -f "${output_file}" ]]; then
+            filename=$(basename "${output_file}")
+            echo "- [${filename}](../outputs/${filename})" >> "${report_file}"
+            output_count=$((output_count + 1))
+        fi
+    done
+fi
+
 if [[ $output_count -eq 0 ]]; then
     echo "- No output files found for this timestamp" >> "${report_file}"
 fi
@@ -387,7 +403,7 @@ result_count=0
 for result_file in "${RESULTS_DIR}"/*"${latest_timestamp}".json; do
     if [[ -f "${result_file}" ]]; then
         filename=$(basename "${result_file}")
-        echo "- \`${filename}\`" >> "${report_file}"
+        echo "- [${filename}](../results/${filename})" >> "${report_file}"
         result_count=$((result_count + 1))
     fi
 done
@@ -515,6 +531,13 @@ if [[ "$QUALITATIVE_EVAL" == true ]]; then
             echo "python3 scripts/qualitative-evaluator.py $main_result_file"
         fi
     fi
+else
+    # Add message when qualitative evaluation is skipped
+    echo "" >> "${report_file}"
+    echo "## Qualitative Evaluation" >> "${report_file}"
+    echo "" >> "${report_file}"
+    echo "*Qualitative evaluation was skipped. To include automated qualitative analysis, run:*" >> "${report_file}"
+    echo "*\`./scripts/analyze-results.sh --with-qualitative-eval\`*" >> "${report_file}"
 fi
 
 echo "" >> "${report_file}"

@@ -1,0 +1,16 @@
+Configuration-Driven Testing Framework - Test Summary
+Test Run ID: config_driven_mistral_nemo_12b_data-analysis_20250612_094201
+Model: mistral-nemo:12b
+Category: data-analysis
+Execution Date: Thu Jun 12 09:44:47 EDT 2025
+
+Files Generated:
+- Output files: outputs/*_20250612_094201.out
+- Result files: results/*_20250612_094201.json
+- Log file: results/test_execution_20250612_094201.log
+
+Next Steps:
+1. Review output files for model responses
+2. Run analysis script: ./scripts/analyze-results.sh
+3. Evaluate qualitative metrics manually
+4. Generate comparative analysis report

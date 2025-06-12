@@ -5,7 +5,19 @@
 
 set -e
 
-TIMESTAMP="20250611_213201"
+# Accept timestamp as argument or find latest
+if [[ $# -gt 0 ]]; then
+    TIMESTAMP="$1"
+else
+    # Find the latest timestamp from output files
+    TIMESTAMP=$(ls outputs/*.out 2>/dev/null | grep -o '[0-9]\{8\}_[0-9]\{6\}' | sort -u | tail -n 1)
+    if [[ -z "$TIMESTAMP" ]]; then
+        echo "Error: No output files found and no timestamp provided"
+        echo "Usage: $0 [TIMESTAMP]"
+        exit 1
+    fi
+fi
+
 OUTPUT_DIR="outputs"
 CLEAN_DIR="outputs_clean"
 
@@ -39,42 +51,32 @@ done
 
 echo "Clean outputs available in ${CLEAN_DIR}/"
 echo ""
-echo "=== Analysis Summary ==="
+echo "=== Cleaned Output Files ==="
+echo "Raw output files have been cleaned to remove terminal escape codes"
 echo ""
 
-# Quick analysis function
-analyze_file() {
-    local file="$1"
-    local test_name="$2"
-    
+# Dynamic analysis of cleaned files
+cleaned_count=0
+for file in "${CLEAN_DIR}"/*"${TIMESTAMP}".out; do
     if [[ -f "${file}" ]]; then
-        local word_count=$(wc -w < "${file}")
-        local line_count=$(wc -l < "${file}")
-        echo "📄 ${test_name}"
+        filename=$(basename "${file}")
+        word_count=$(wc -w < "${file}")
+        line_count=$(wc -l < "${file}")
+        
+        echo "📄 ${filename}"
         echo "   Lines: ${line_count}, Words: ${word_count}"
         echo "   Preview: $(head -n 3 "${file}" | tr '\n' ' ' | cut -c1-80)..."
         echo ""
+        
+        cleaned_count=$((cleaned_count + 1))
     fi
-}
+done
 
-# Analyze qwen2.5-coder outputs
-echo "🤖 qwen2.5-coder:7b Results:"
-echo ""
-analyze_file "${CLEAN_DIR}/qc01_${TIMESTAMP}.out" "QC-01: Binary Search Implementation"
-analyze_file "${CLEAN_DIR}/qc02_${TIMESTAMP}.out" "QC-02: Performance Optimization" 
-analyze_file "${CLEAN_DIR}/qc03_${TIMESTAMP}.out" "QC-03: Bug Fixing"
-analyze_file "${CLEAN_DIR}/qc04_${TIMESTAMP}.out" "QC-04: Code Review"
-analyze_file "${CLEAN_DIR}/qc05_${TIMESTAMP}.out" "QC-05: Documentation Generation"
-analyze_file "${CLEAN_DIR}/qc06_${TIMESTAMP}.out" "QC-06: API Integration"
+if [[ $cleaned_count -eq 0 ]]; then
+    echo "⚠️  No files were cleaned for timestamp ${TIMESTAMP}"
+    echo "   Check if output files exist: ls -la ${OUTPUT_DIR}/*${TIMESTAMP}*"
+else
+    echo "✅ ${cleaned_count} output files cleaned and ready for analysis"
+fi
 
-echo "🤖 mistral-nemo:12b Results:"
-echo ""
-analyze_file "${CLEAN_DIR}/mn01_${TIMESTAMP}.out" "MN-01: CSV Data Analysis"
-analyze_file "${CLEAN_DIR}/mn02_${TIMESTAMP}.out" "MN-02: Email Thread Correlation"
-analyze_file "${CLEAN_DIR}/mn03_${TIMESTAMP}.out" "MN-03: Multi-source Data Fusion"
-analyze_file "${CLEAN_DIR}/mn04_${TIMESTAMP}.out" "MN-04: Data Validation"
-analyze_file "${CLEAN_DIR}/mn05_${TIMESTAMP}.out" "MN-05: Executive Report Generation"
-analyze_file "${CLEAN_DIR}/mn06_${TIMESTAMP}.out" "MN-06: Pattern Recognition"
-
-echo "✅ Clean outputs ready for detailed human analysis"
 echo "📁 Location: ${CLEAN_DIR}/"
