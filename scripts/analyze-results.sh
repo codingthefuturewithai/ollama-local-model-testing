@@ -297,6 +297,117 @@ else
 fi
 echo "" >> "${report_file}"
 
+# Run qualitative evaluation BEFORE writing the quality section (if requested)
+qualitative_scores=""
+if [[ "$QUALITATIVE_EVAL" == true ]]; then
+    echo -e "${BLUE}[INFO]${NC} Running automated qualitative evaluation using Gemini 2.5 Flash Preview..."
+    
+    # Create a consolidated results file for qualitative evaluation
+    main_result_file="${REPORTS_DIR}/consolidated_${latest_timestamp}.json"
+    if [[ ! -f "$main_result_file" ]]; then
+        echo -e "${BLUE}[INFO]${NC} Creating consolidated results file for evaluation..."
+        
+        # Use jq to properly construct the consolidated JSON
+        {
+            echo "{"
+            echo "  \"test_session\": {"
+            echo "    \"timestamp\": \"${latest_timestamp}\","
+            echo "    \"model\": \"${model_name}\","
+            echo "    \"category\": \"${category}\""
+            echo "  },"
+            echo "  \"summary\": {"
+            echo "    \"total_tests\": $(ls ${RESULTS_DIR}/*${latest_timestamp}.json | wc -l | xargs)"
+            echo "  },"
+            echo "  \"results\": {"
+            
+            # Process each test result file
+            first_file=true
+            for result_file in "${RESULTS_DIR}"/*"${latest_timestamp}".json; do
+                if [[ -f "$result_file" ]]; then
+                    test_id=$(jq -r '.test_case.id' "$result_file" 2>/dev/null || echo "unknown")
+                    if [[ "$test_id" != "unknown" ]]; then
+                        if [[ "$first_file" != true ]]; then
+                            echo ","
+                        fi
+                        
+                        # Extract fields using jq and properly escape JSON
+                        test_type=$(jq -r '.test_case.category' "$result_file" 2>/dev/null || echo "unknown")
+                        test_desc=$(jq -r '.test_case.description' "$result_file" 2>/dev/null || echo "unknown")
+                        test_prompt=$(jq -r '.input.prompt' "$result_file" 2>/dev/null || echo "")
+                        model_name_from_file=$(jq -r '.model.name' "$result_file" 2>/dev/null || echo "unknown")
+                        output_content=$(jq -r '.output.content' "$result_file" 2>/dev/null || echo "")
+                        
+                        # Build the test entry using jq to ensure proper JSON escaping
+                        echo -n "    \"$test_id\": "
+                        jq -n \
+                            --arg type "$test_type" \
+                            --arg prompt "$test_prompt" \
+                            --arg desc "$test_desc" \
+                            --arg model "$model_name_from_file" \
+                            --arg output "$output_content" \
+                            '{
+                                test_config: {
+                                    type: $type,
+                                    prompt: $prompt,
+                                    description: $desc
+                                },
+                                model: $model,
+                                output: $output
+                            }'
+                        
+                        first_file=false
+                    fi
+                fi
+            done
+            
+            echo "  }"
+            echo "}"
+        } > "$main_result_file"
+        
+        # Validate the consolidated file
+        if [[ ! -f "$main_result_file" ]] || ! jq -e '.results' "$main_result_file" >/dev/null 2>&1; then
+            echo -e "${YELLOW}[WARNING]${NC} Failed to create consolidated results file"
+            # Find the best result file to use as fallback
+            result_files=("${RESULTS_DIR}"/*"${latest_timestamp}".json)
+            if [[ ${#result_files[@]} -gt 0 && -f "${result_files[0]}" ]]; then
+                main_result_file="${result_files[0]}"
+            else
+                echo -e "${YELLOW}[WARNING]${NC} No suitable result file found for qualitative evaluation"
+                QUALITATIVE_EVAL=false
+            fi
+        fi
+    fi
+    
+    if [[ "$QUALITATIVE_EVAL" == true ]]; then
+        # Run the qualitative evaluator
+        qualitative_output_file="${REPORTS_DIR}/qualitative_${latest_timestamp}.json"
+        
+        if python3 scripts/qualitative-evaluator.py "$main_result_file" --output "$qualitative_output_file" 2>/dev/null; then
+            echo -e "${GREEN}[SUCCESS]${NC} Qualitative evaluation completed"
+            
+            # Extract scores for integration into report
+            if [[ -f "$qualitative_output_file" ]]; then
+                avg_correctness=$(jq -r '.qualitative_summary.avg_correctness' "$qualitative_output_file" 2>/dev/null || echo "N/A")
+                avg_completeness=$(jq -r '.qualitative_summary.avg_completeness' "$qualitative_output_file" 2>/dev/null || echo "N/A")
+                avg_quality=$(jq -r '.qualitative_summary.avg_quality' "$qualitative_output_file" 2>/dev/null || echo "N/A")
+                tests_evaluated=$(jq -r '.qualitative_summary.total_tests_evaluated' "$qualitative_output_file" 2>/dev/null || echo "N/A")
+                
+                qualitative_scores="### Summary Scores (0-10 scale)
+- **Average Correctness:** ${avg_correctness}/10
+- **Average Completeness:** ${avg_completeness}/10
+- **Average Quality:** ${avg_quality}/10
+- **Tests Evaluated:** ${tests_evaluated}
+
+**Detailed Evaluation:** See \`$(basename "$qualitative_output_file")\` for complete analysis with reasoning.
+"
+            fi
+        else
+            echo -e "${YELLOW}[WARNING]${NC} Qualitative evaluation failed - continuing with standard analysis"
+            QUALITATIVE_EVAL=false
+        fi
+    fi
+fi
+
 # Add evaluation process section with actual scores if available
 if [[ "$QUALITATIVE_EVAL" == true ]]; then
     cat >> "${report_file}" << 'EOF'
@@ -306,6 +417,8 @@ if [[ "$QUALITATIVE_EVAL" == true ]]; then
 *The following analysis was performed using Gemini 2.5 Flash Preview*
 
 EOF
+    # Add the qualitative scores
+    echo "$qualitative_scores" >> "${report_file}"
 else
     cat >> "${report_file}" << 'EOF'
 ## Manual Quality Evaluation Guide
@@ -363,6 +476,7 @@ else
     use_clean_outputs=false
 fi
 
+# Add output files section
 echo "" >> "${report_file}"
 if [[ "$use_clean_outputs" == true ]]; then
     echo "### Cleaned Output Files" >> "${report_file}"
@@ -409,135 +523,6 @@ for result_file in "${RESULTS_DIR}"/*"${latest_timestamp}".json; do
 done
 if [[ $result_count -eq 0 ]]; then
     echo "- No result files found for this timestamp" >> "${report_file}"
-fi
-
-# Run qualitative evaluation if requested
-qualitative_report=""
-if [[ "$QUALITATIVE_EVAL" == true ]]; then
-    echo ""
-    echo -e "${BLUE}[INFO]${NC} Running automated qualitative evaluation using Gemini 2.5 Flash Preview..."
-    
-    # Find the main result file to evaluate
-    main_result_file=""
-    
-    # Create a consolidated results file for qualitative evaluation
-    consolidated_file="${REPORTS_DIR}/consolidated_${latest_timestamp}.json"
-    echo -e "${BLUE}[INFO]${NC} Creating consolidated results file for evaluation..."
-    
-    # Use jq to properly construct the consolidated JSON
-    {
-        echo "{"
-        echo "  \"test_session\": {"
-        echo "    \"timestamp\": \"${latest_timestamp}\","
-        echo "    \"model\": \"${model_name}\","
-        echo "    \"category\": \"${category}\""
-        echo "  },"
-        echo "  \"summary\": {"
-        echo "    \"total_tests\": $(ls ${RESULTS_DIR}/*${latest_timestamp}.json | wc -l | xargs)"
-        echo "  },"
-        echo "  \"results\": {"
-        
-        # Process each test result file
-        first_file=true
-        for result_file in "${RESULTS_DIR}"/*"${latest_timestamp}".json; do
-            if [[ -f "$result_file" ]]; then
-                test_id=$(jq -r '.test_case.id' "$result_file" 2>/dev/null || echo "unknown")
-                if [[ "$test_id" != "unknown" ]]; then
-                    if [[ "$first_file" != true ]]; then
-                        echo ","
-                    fi
-                    
-                    # Extract fields using jq and properly escape JSON
-                    test_type=$(jq -r '.test_case.category' "$result_file" 2>/dev/null || echo "unknown")
-                    test_desc=$(jq -r '.test_case.description' "$result_file" 2>/dev/null || echo "unknown")
-                    test_prompt=$(jq -r '.input.prompt' "$result_file" 2>/dev/null || echo "")
-                    model_name_from_file=$(jq -r '.model.name' "$result_file" 2>/dev/null || echo "unknown")
-                    output_content=$(jq -r '.output.content' "$result_file" 2>/dev/null || echo "")
-                    
-                    # Build the test entry using jq to ensure proper JSON escaping
-                    echo -n "    \"$test_id\": "
-                    jq -n \
-                        --arg type "$test_type" \
-                        --arg prompt "$test_prompt" \
-                        --arg desc "$test_desc" \
-                        --arg model "$model_name_from_file" \
-                        --arg output "$output_content" \
-                        '{
-                            test_config: {
-                                type: $type,
-                                prompt: $prompt,
-                                description: $desc
-                            },
-                            model: $model,
-                            output: $output
-                        }'
-                    
-                    first_file=false
-                fi
-            fi
-        done
-        
-        echo "  }"
-        echo "}"
-    } > "$consolidated_file"
-
-    if [[ -f "$consolidated_file" ]] && jq -e '.results' "$consolidated_file" >/dev/null 2>&1; then
-        main_result_file="$consolidated_file"
-    else
-        echo -e "${YELLOW}[WARNING]${NC} Failed to create consolidated results file"
-        echo "Skipping automated evaluation - you can run it manually later with:"
-        echo "python3 scripts/qualitative-evaluator.py ${RESULTS_DIR}/your-result-file.json"
-    fi
-    
-    if [[ -z "$main_result_file" ]]; then
-        echo -e "${YELLOW}[WARNING]${NC} No suitable result file found for qualitative evaluation"
-        echo "Skipping automated evaluation - you can run it manually later with:"
-        echo "python3 scripts/qualitative-evaluator.py ${RESULTS_DIR}/your-result-file.json"
-    else
-        echo -e "${BLUE}[INFO]${NC} Evaluating: $(basename "$main_result_file")"
-        
-        # Run the qualitative evaluator - let it handle its own dependencies and validation
-        qualitative_output_file="${REPORTS_DIR}/qualitative_${latest_timestamp}.json"
-        
-        if python3 scripts/qualitative-evaluator.py "$main_result_file" --output "$qualitative_output_file"; then
-            echo -e "${GREEN}[SUCCESS]${NC} Qualitative evaluation completed"
-            qualitative_report="$qualitative_output_file"
-            
-            # Add qualitative results to the main report
-            echo "" >> "${report_file}"
-            echo "## Automated Qualitative Evaluation" >> "${report_file}"
-            echo "" >> "${report_file}"
-            echo "*Evaluated using Gemini 2.5 Flash Preview*" >> "${report_file}"
-            echo "" >> "${report_file}"
-            
-            # Extract and add summary scores
-            if [[ -f "$qualitative_report" ]]; then
-                avg_correctness=$(jq -r '.qualitative_summary.avg_correctness' "$qualitative_report" 2>/dev/null || echo "N/A")
-                avg_completeness=$(jq -r '.qualitative_summary.avg_completeness' "$qualitative_report" 2>/dev/null || echo "N/A")
-                avg_quality=$(jq -r '.qualitative_summary.avg_quality' "$qualitative_report" 2>/dev/null || echo "N/A")
-                tests_evaluated=$(jq -r '.qualitative_summary.total_tests_evaluated' "$qualitative_report" 2>/dev/null || echo "N/A")
-                
-                echo "### Summary Scores (0-10 scale)" >> "${report_file}"
-                echo "- **Average Correctness:** ${avg_correctness}/10" >> "${report_file}"
-                echo "- **Average Completeness:** ${avg_completeness}/10" >> "${report_file}"
-                echo "- **Average Quality:** ${avg_quality}/10" >> "${report_file}"
-                echo "- **Tests Evaluated:** ${tests_evaluated}" >> "${report_file}"
-                echo "" >> "${report_file}"
-                echo "**Detailed Evaluation:** See \`$(basename "$qualitative_report")\` for complete analysis with reasoning." >> "${report_file}"
-            fi
-        else
-            echo -e "${YELLOW}[WARNING]${NC} Qualitative evaluation failed - continuing with standard analysis"
-            echo "You can run qualitative evaluation manually with:"
-            echo "python3 scripts/qualitative-evaluator.py $main_result_file"
-        fi
-    fi
-else
-    # Add message when qualitative evaluation is skipped
-    echo "" >> "${report_file}"
-    echo "## Qualitative Evaluation" >> "${report_file}"
-    echo "" >> "${report_file}"
-    echo "*Qualitative evaluation was skipped. To include automated qualitative analysis, run:*" >> "${report_file}"
-    echo "*\`./scripts/analyze-results.sh --with-qualitative-eval\`*" >> "${report_file}"
 fi
 
 echo "" >> "${report_file}"
