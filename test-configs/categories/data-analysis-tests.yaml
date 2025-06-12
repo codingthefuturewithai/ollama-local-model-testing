@@ -1,0 +1,197 @@
+category:
+  id: "data"
+  name: "Data Analysis Tests"
+  description: "CSV processing, correlation, business intelligence, and reporting tests"
+
+tests:
+  - id: "dt01"
+    title: "CSV Data Analysis"
+    description: "Assess structured data processing capabilities"
+    timeout: 120
+    data_sources:
+      - id: "orders_data"
+        type: "file_content"
+        file: "test-data/sample-csv/orders.csv"
+    prompt_template: |
+      Analyze the following orders CSV data and provide insights:
+
+      {data_sources.orders_data}
+
+      Please provide: 1. Summary statistics (total orders, revenue, average order value) 2. Top 3 customers by order value 3. Product performance analysis 4. Geographic distribution of orders 5. Order status breakdown 6. Any notable patterns or trends you observe. Format your response as a structured business report.
+    evaluation_criteria:
+      correctness_weight: 0.4
+      completeness_weight: 0.3
+      quality_weight: 0.3
+
+  - id: "dt02"
+    title: "Email Thread Correlation"
+    description: "Test information extraction and correlation skills"
+    timeout: 120
+    data_sources:
+      - id: "email_data"
+        type: "file_content"
+        file: "test-data/sample-emails/order-correspondence.txt"
+    prompt_template: |
+      Analyze this email thread and extract key information:
+
+      {data_sources.email_data}
+
+      Extract and organize: 1. Order details (ID, customer, products, quantities, prices) 2. Timeline of communications 3. Customer concerns or requests 4. Resolution status 5. Follow-up actions needed 6. Customer satisfaction indicators. Present the analysis in a customer service summary format.
+    evaluation_criteria:
+      correctness_weight: 0.4
+      completeness_weight: 0.3
+      quality_weight: 0.3
+
+  - id: "dt03"
+    title: "Multi-source Data Fusion"
+    description: "Evaluate cross-source data integration skills"
+    timeout: 180
+    data_sources:
+      - id: "orders_data"
+        type: "file_content"
+        file: "test-data/sample-csv/orders.csv"
+      - id: "customers_data"
+        type: "file_content"
+        file: "test-data/sample-csv/customers.csv"
+      - id: "business_updates"
+        type: "file_content"
+        file: "test-data/sample-emails/business-updates.txt"
+      - id: "product_specs"
+        type: "file_content"
+        file: "test-data/sample-pdf-text/product-specifications.txt"
+    prompt_template: |
+      Combine and analyze data from these sources to create a comprehensive business intelligence report:
+
+      CSV DATA - ORDERS:
+      {data_sources.orders_data}
+
+      CSV DATA - CUSTOMERS:
+      {data_sources.customers_data}
+
+      EMAIL DATA:
+      {data_sources.business_updates}
+
+      PRODUCT SPECIFICATIONS:
+      {data_sources.product_specs}
+
+      Create a unified analysis that: 1. Correlates customer data with order patterns 2. Validates information consistency across sources 3. Identifies business performance trends 4. Highlights any discrepancies or issues 5. Provides strategic recommendations 6. Creates an executive summary dashboard. Present as a comprehensive business intelligence report.
+    evaluation_criteria:
+      correctness_weight: 0.4
+      completeness_weight: 0.3
+      quality_weight: 0.3
+
+  - id: "dt04"
+    title: "Data Validation"
+    description: "Test data quality assessment capabilities"
+    timeout: 150
+    data_sources:
+      - id: "orders_data"
+        type: "file_content"
+        file: "test-data/sample-csv/orders.csv"
+      - id: "customers_data"
+        type: "file_content"
+        file: "test-data/sample-csv/customers.csv"
+      - id: "email_data"
+        type: "file_content"
+        file: "test-data/sample-emails/order-correspondence.txt"
+      - id: "business_updates"
+        type: "file_content"
+        file: "test-data/sample-emails/business-updates.txt"
+    prompt_template: |
+      Perform a data quality audit across these datasets and identify any inconsistencies, errors, or missing information:
+
+      ORDERS DATA:
+      {data_sources.orders_data}
+
+      CUSTOMER DATA:
+      {data_sources.customers_data}
+
+      EMAIL REFERENCES:
+      {data_sources.email_data}
+      {data_sources.business_updates}
+
+      Check for: 1. Data consistency between orders and customer records 2. Email references that match or contradict CSV data 3. Missing or incomplete information 4. Potential data entry errors 5. Conflicting information across sources 6. Data quality scores and recommendations. Provide a detailed data quality report with specific examples.
+    evaluation_criteria:
+      correctness_weight: 0.4
+      completeness_weight: 0.3
+      quality_weight: 0.3
+
+  - id: "dt05"
+    title: "Executive Report Generation"
+    description: "Test business intelligence and reporting skills"
+    timeout: 180
+    data_sources:
+      - id: "orders_data"
+        type: "file_content"
+        file: "test-data/sample-csv/orders.csv"
+      - id: "customers_data"
+        type: "file_content"
+        file: "test-data/sample-csv/customers.csv"
+      - id: "business_updates"
+        type: "file_content"
+        file: "test-data/sample-emails/business-updates.txt"
+      - id: "product_specs"
+        type: "file_content"
+        file: "test-data/sample-pdf-text/product-specifications.txt"
+    prompt_template: |
+      Create an executive summary report for TechStore's Q1 2024 performance using all available data:
+
+      SALES DATA:
+      {data_sources.orders_data}
+
+      CUSTOMER PROFILES:
+      {data_sources.customers_data}
+
+      BUSINESS UPDATES:
+      {data_sources.business_updates}
+
+      PRODUCT INFORMATION:
+      {data_sources.product_specs}
+
+      Generate a professional executive summary that includes: 1. Key performance indicators (KPIs) 2. Revenue and growth analysis 3. Customer insights and segmentation 4. Product performance highlights 5. Market trends and opportunities 6. Risk factors and challenges 7. Strategic recommendations for Q2. Format as a professional business document suitable for senior leadership.
+    evaluation_criteria:
+      correctness_weight: 0.4
+      completeness_weight: 0.3
+      quality_weight: 0.3
+
+  - id: "dt06"
+    title: "Pattern Recognition & Trend Analysis"
+    description: "Evaluate pattern detection and analytical skills"
+    timeout: 180
+    data_sources:
+      - id: "orders_data"
+        type: "file_content"
+        file: "test-data/sample-csv/orders.csv"
+      - id: "customers_data"
+        type: "file_content"
+        file: "test-data/sample-csv/customers.csv"
+      - id: "email_data"
+        type: "file_content"
+        file: "test-data/sample-emails/order-correspondence.txt"
+      - id: "business_updates"
+        type: "file_content"
+        file: "test-data/sample-emails/business-updates.txt"
+      - id: "product_specs"
+        type: "file_content"
+        file: "test-data/sample-pdf-text/product-specifications.txt"
+    prompt_template: |
+      Analyze all available data to identify patterns, trends, and anomalies:
+
+      TRANSACTION DATA:
+      {data_sources.orders_data}
+
+      CUSTOMER BEHAVIOR:
+      {data_sources.customers_data}
+
+      COMMUNICATION PATTERNS:
+      {data_sources.email_data}
+      {data_sources.business_updates}
+
+      PRODUCT PERFORMANCE:
+      {data_sources.product_specs}
+
+      Identify: 1. Customer behavior patterns and segments 2. Product sales trends and correlations 3. Seasonal or temporal patterns 4. Geographic trends 5. Communication pattern analysis 6. Anomalies or outliers that require attention 7. Predictive insights for future planning. Present findings with supporting evidence and confidence levels.
+    evaluation_criteria:
+      correctness_weight: 0.4
+      completeness_weight: 0.3
+      quality_weight: 0.3

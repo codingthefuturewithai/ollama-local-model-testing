@@ -1,0 +1,95 @@
+data_sources:
+  # Code extraction sources for coding tests
+  - id: "slow_search_code"
+    type: "file_extract"
+    description: "Performance optimization test - inefficient search function"
+    file: "test-data/sample-code/code-samples.py"
+    extract:
+      method: "sed"
+      pattern: "/def slow_search/,/return found_indices/p"
+    cache_ttl: 300
+
+  - id: "buggy_stack_code"
+    type: "file_extract"
+    description: "Bug fixing test - stack implementation with multiple bugs"
+    file: "test-data/sample-code/code-samples.py"
+    extract:
+      method: "sed"
+      pattern: "/class BuggyStack/,/return len(self.items) > 0/p"
+    cache_ttl: 300
+
+  - id: "undocumented_function_code"
+    type: "file_extract"
+    description: "Code review test - function needing documentation and improvements"
+    file: "test-data/sample-code/code-samples.py"
+    extract:
+      method: "sed"
+      pattern: "/def undocumented_function/,/return result/p"
+    cache_ttl: 300
+
+  - id: "fibonacci_function_code"
+    type: "file_extract"
+    description: "Documentation generation test - fibonacci implementation"
+    file: "test-data/sample-code/code-samples.py"
+    extract:
+      method: "sed"
+      pattern: "/def fibonacci/,/return fib/p"
+    cache_ttl: 300
+
+  # File content sources for data analysis tests
+  - id: "orders_csv"
+    type: "file_content"
+    description: "Business orders CSV data for analysis"
+    file: "test-data/sample-csv/orders.csv"
+    cache_ttl: 600
+    preprocessing:
+      - type: "trim"
+        description: "Remove leading/trailing whitespace"
+
+  - id: "customers_csv"
+    type: "file_content"
+    description: "Customer profile data"
+    file: "test-data/sample-csv/customers.csv"
+    cache_ttl: 600
+    preprocessing:
+      - type: "trim"
+        description: "Remove leading/trailing whitespace"
+
+  - id: "order_correspondence_emails"
+    type: "file_content"
+    description: "Customer service email thread"
+    file: "test-data/sample-emails/order-correspondence.txt"
+    cache_ttl: 600
+
+  - id: "business_updates_emails"
+    type: "file_content"
+    description: "Internal business communication updates"
+    file: "test-data/sample-emails/business-updates.txt"
+    cache_ttl: 600
+
+  - id: "product_specifications"
+    type: "file_content"
+    description: "Product specification documents"
+    file: "test-data/sample-pdf-text/product-specifications.txt"
+    cache_ttl: 600
+
+  # Multi-source combinations for complex analysis
+  - id: "complete_business_dataset"
+    type: "multi_source"
+    description: "Complete business intelligence dataset"
+    sources: 
+      - "orders_csv"
+      - "customers_csv"
+      - "business_updates_emails"
+      - "product_specifications"
+    cache_ttl: 300
+
+  - id: "data_validation_dataset"
+    type: "multi_source"
+    description: "Dataset for data quality validation testing"
+    sources:
+      - "orders_csv"
+      - "customers_csv"
+      - "order_correspondence_emails"
+      - "business_updates_emails"
+    cache_ttl: 300

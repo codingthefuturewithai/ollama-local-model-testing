@@ -1,0 +1,115 @@
+category:
+  id: "coding"
+  name: "Coding Tests"
+  description: "Algorithm implementation, debugging, and code quality tests"
+
+tests:
+  - id: "ct01"
+    title: "Binary Search Implementation"
+    description: "Assess algorithm implementation skills"
+    timeout: 90
+    prompt_template: |
+      Implement a binary search function in Python that: 1. Takes a sorted list and target value as parameters 2. Returns the index of the target if found, -1 if not found 3. Uses the standard binary search algorithm (O(log n) complexity) 4. Includes proper error handling for edge cases 5. Add docstring with complexity analysis and examples. Please provide a complete, well-documented implementation.
+    evaluation_criteria:
+      correctness_weight: 0.4
+      completeness_weight: 0.3
+      quality_weight: 0.3
+
+  - id: "ct02"
+    title: "Performance Optimization"
+    description: "Evaluate code analysis and optimization skills"
+    timeout: 90
+    data_sources:
+      - id: "slow_search_code"
+        type: "file_extract"
+        file: "test-data/sample-code/code-samples.py"
+        extract:
+          method: "sed"
+          pattern: "/def slow_search/,/return found_indices/p"
+    prompt_template: |
+      The following function has performance issues. Analyze the code and provide an optimized version:
+
+      {data_sources.slow_search_code}
+
+      Please: 1. Identify the performance problems 2. Provide an optimized implementation 3. Explain the improvements and their impact 4. Include time complexity analysis (before vs after) 5. Add any additional optimizations you would recommend
+    evaluation_criteria:
+      correctness_weight: 0.4
+      completeness_weight: 0.3
+      quality_weight: 0.3
+
+  - id: "ct03"
+    title: "Bug Fixing"
+    description: "Test debugging and problem-solving abilities"
+    timeout: 90
+    data_sources:
+      - id: "buggy_code"
+        type: "file_extract"
+        file: "test-data/sample-code/code-samples.py"
+        extract:
+          method: "sed"
+          pattern: "/class BuggyStack/,/return len(self.items) > 0/p"
+    prompt_template: |
+      The following Python code has several bugs. Find and fix all issues:
+
+      {data_sources.buggy_code}
+
+      Please: 1. Identify all bugs in the code 2. Provide the corrected implementation 3. Explain what each bug was and why it was problematic 4. Test the fix with example usage 5. Suggest any additional improvements
+    evaluation_criteria:
+      correctness_weight: 0.4
+      completeness_weight: 0.3
+      quality_weight: 0.3
+
+  - id: "ct04"
+    title: "Code Review Analysis"
+    description: "Assess code review and analysis capabilities"
+    timeout: 90
+    data_sources:
+      - id: "undocumented_code"
+        type: "file_extract"
+        file: "test-data/sample-code/code-samples.py"
+        extract:
+          method: "sed"
+          pattern: "/def undocumented_function/,/return result/p"
+    prompt_template: |
+      Please review this function and provide suggestions for improvement:
+
+      {data_sources.undocumented_code}
+
+      Provide: 1. Analysis of what the function does 2. Suggestions for better naming 3. Documentation improvements 4. Potential edge cases or bugs 5. Overall code quality assessment
+    evaluation_criteria:
+      correctness_weight: 0.4
+      completeness_weight: 0.3
+      quality_weight: 0.3
+
+  - id: "ct05"
+    title: "Documentation Generation"
+    description: "Test documentation and communication skills"
+    timeout: 90
+    data_sources:
+      - id: "fibonacci_code"
+        type: "file_extract"
+        file: "test-data/sample-code/code-samples.py"
+        extract:
+          method: "sed"
+          pattern: "/def fibonacci/,/return fib/p"
+    prompt_template: |
+      Generate complete API documentation for this Fibonacci function:
+
+      {data_sources.fibonacci_code}
+
+      Include: 1. Detailed docstring with parameters, return value, and examples 2. Type hints 3. Usage examples 4. Time/space complexity analysis 5. Any potential improvements or alternative approaches
+    evaluation_criteria:
+      correctness_weight: 0.4
+      completeness_weight: 0.3
+      quality_weight: 0.3
+
+  - id: "ct06"
+    title: "API Integration"
+    description: "Evaluate practical development skills"
+    timeout: 120
+    prompt_template: |
+      Write a Python class that interacts with a REST API for user management. The class should: 1. Have methods for GET, POST, PUT, DELETE operations 2. Handle authentication with API keys 3. Include proper error handling and retries 4. Support JSON request/response data 5. Add logging for debugging 6. Include type hints and documentation. Base URL: https://api.example.com/v1/users. API Key should be passed in headers as 'X-API-Key'. Create a complete, production-ready implementation.
+    evaluation_criteria:
+      correctness_weight: 0.4
+      completeness_weight: 0.3
+      quality_weight: 0.3
