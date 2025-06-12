@@ -26,6 +26,73 @@ NC='\033[0m' # No Color
 # Create directories
 mkdir -p "${OUTPUT_DIR}" "${RESULTS_DIR}" "${REPORTS_DIR}"
 
+# Parse command line arguments
+HELP=false
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --help|-h)
+            HELP=true
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1"
+            HELP=true
+            shift
+            ;;
+    esac
+done
+
+# Show help if requested
+if [[ "$HELP" == true ]]; then
+    echo "Usage: $0 [OPTIONS]"
+    echo ""
+    echo "=== Generic Configuration-Driven Test Runner v3.0 ==="
+    echo "Zero External Dependencies - Python + Shell Only"
+    echo ""
+    echo "Description:"
+    echo "  Interactive test runner that dynamically detects available Ollama models"
+    echo "  and executes configuration-driven tests based on YAML test definitions."
+    echo ""
+    echo "Options:"
+    echo "  --help, -h                 Show this help message"
+    echo ""
+    echo "Features:"
+    echo "  • Dynamic model selection from locally available Ollama models"
+    echo "  • Category-based testing (coding, data analysis, or all tests)"
+    echo "  • Configuration-driven test execution via YAML files"
+    echo "  • Automated timing and performance metrics"
+    echo "  • JSON-structured result files"
+    echo "  • Comprehensive logging and reporting"
+    echo ""
+    echo "Test Categories:"
+    echo "  • Coding Tests: Algorithm implementation, optimization, debugging"
+    echo "  • Data Analysis Tests: CSV processing, business intelligence, reporting"
+    echo "  • All Tests: Complete test suite"
+    echo ""
+    echo "Examples:"
+    echo "  $0                         Launch interactive test runner"
+    echo "  $0 --help                  Show this help message"
+    echo ""
+    echo "Output Files:"
+    echo "  • outputs/*.out            Raw model responses"
+    echo "  • results/*.json           Structured test results with metrics"
+    echo "  • results/test_summary_*.txt Summary report"
+    echo "  • results/test_execution_*.log Execution log"
+    echo ""
+    echo "Next Steps After Testing:"
+    echo "  • Run analysis: ./scripts/analyze-results.sh"
+    echo "  • Enhanced analysis: ./scripts/analyze-results.sh --with-qualitative-eval"
+    echo "  • Clean outputs: ./scripts/clean-outputs.sh"
+    echo ""
+    echo "Requirements:"
+    echo "  • Ollama installed and running"
+    echo "  • At least one model pulled (e.g., ollama pull qwen2.5-coder:7b)"
+    echo "  • Python 3.x for YAML configuration processing"
+    echo "  • jq and bc utilities"
+    exit 0
+fi
+
 # Logging function
 log() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" | tee -a "${LOG_FILE}"
@@ -448,4 +515,4 @@ main() {
 }
 
 # Run main function
-main "$@"
+main
