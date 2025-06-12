@@ -2,6 +2,7 @@
 
 # Ollama Model Testing Framework - Results Analyzer
 # Purpose: Analyze test results and generate comparison reports
+# Version: 2.0 - Enhanced for interactive and category-based testing
 
 set -e
 
@@ -15,35 +16,137 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
 NC='\033[0m'
 
 mkdir -p "${REPORTS_DIR}"
 
-echo -e "${GREEN}=== Ollama Test Results Analyzer ===${NC}"
+echo -e "${GREEN}=== Ollama Test Results Analyzer v2.0 ===${NC}"
 echo ""
 
 # Check if we have results
 if [[ ! -d "${RESULTS_DIR}" ]] || [[ -z "$(ls -A ${RESULTS_DIR}/*.json 2>/dev/null)" ]]; then
     echo -e "${RED}[ERROR]${NC} No test results found in ${RESULTS_DIR}/"
-    echo "Please run './scripts/run-tests.sh' first to generate test results."
+    echo "Please run './scripts/interactive-test-runner.sh' first."
     exit 1
 fi
 
-# Find the latest test run
-latest_timestamp=$(ls "${RESULTS_DIR}"/*.json | grep -o '[0-9]\{8\}_[0-9]\{6\}' | sort | tail -n 1)
+# Function to detect test run type and get latest timestamp
+get_latest_test_info() {
+    local latest_file=$(ls -t "${RESULTS_DIR}"/*.json | head -n 1)
+    local timestamp=""
+    local model_name=""
+    local category=""
+    
+    if [[ ! -f "$latest_file" ]]; then
+        echo "|||"
+        return 1
+    fi
+    
+    # Extract timestamp from filename
+    timestamp=$(basename "$latest_file" | grep -o '[0-9]\{8\}_[0-9]\{6\}' || echo "unknown")
+    
+    # Get test_run_id to parse model and category
+    local test_run_id=$(jq -r '.test_run_id' "$latest_file" 2>/dev/null || echo "")
+    
+    if [[ "$test_run_id" == interactive_* ]]; then
+        # Parse interactive test run ID
+        # Expected formats:
+        # interactive_qwen2_5_coder_7b_coding_timestamp
+        # interactive_mistral_nemo_12b_data_timestamp
+        # interactive_deepseek_r1_8b_coding_timestamp
+        
+        IFS='_' read -ra PARTS <<< "$test_run_id"
+        local num_parts=${#PARTS[@]}
+        
+        if [[ $num_parts -ge 6 ]]; then
+            # Parse model name based on pattern recognition
+            if [[ "${PARTS[1]}" == "qwen2" && "${PARTS[2]}" == "5" ]]; then
+                # qwen2_5_coder_7b -> qwen2.5-coder:7b
+                model_name="qwen2.5-${PARTS[3]}:${PARTS[4]}"
+                category="${PARTS[5]}"
+            elif [[ "${PARTS[1]}" == "mistral" ]]; then
+                # mistral_nemo_12b -> mistral-nemo:12b
+                model_name="${PARTS[1]}-${PARTS[2]}:${PARTS[3]}"
+                category="${PARTS[4]}"
+            elif [[ "${PARTS[1]}" == "deepseek" ]]; then
+                # deepseek_r1_8b -> deepseek-r1:8b
+                model_name="${PARTS[1]}-${PARTS[2]}:${PARTS[3]}"
+                category="${PARTS[4]}"
+            else
+                # Generic fallback: try to reconstruct
+                model_name="${PARTS[1]}-${PARTS[2]}:${PARTS[3]}"
+                category="${PARTS[4]}"
+            fi
+        else
+            # Fallback to JSON if parsing fails
+            model_name=$(jq -r '.model.name' "$latest_file" 2>/dev/null || echo "unknown")
+            category=$(jq -r '.test_case.category' "$latest_file" 2>/dev/null || echo "unknown")
+        fi
+        
+        # Validate category
+        if [[ "$category" != "coding" && "$category" != "data" && "$category" != "all" ]]; then
+            # Try fallback: get from JSON
+            category=$(jq -r '.test_case.category' "$latest_file" 2>/dev/null || echo "unknown")
+        fi
+        
+        # Validate model name format
+        if [[ ! "$model_name" =~ ^[a-zA-Z0-9.-]+:[a-zA-Z0-9.-]+$ && "$model_name" != "unknown" ]]; then
+            # Fallback to JSON
+            model_name=$(jq -r '.model.name' "$latest_file" 2>/dev/null || echo "unknown")
+        fi
+    else
+        # Not an interactive test - get from JSON
+        model_name=$(jq -r '.model.name' "$latest_file" 2>/dev/null || echo "unknown")
+        category=$(jq -r '.test_case.category' "$latest_file" 2>/dev/null || echo "unknown")
+    fi
+    
+    echo "${timestamp}|${model_name}|${category}"
+}
+
+# Parse latest test info
+test_info=$(get_latest_test_info)
+if [[ $? -ne 0 ]]; then
+    echo -e "${RED}[ERROR]${NC} Failed to parse test information"
+    exit 1
+fi
+
+IFS='|' read -r latest_timestamp model_name category <<< "$test_info"
+
+if [[ -z "$latest_timestamp" || "$latest_timestamp" == "unknown" ]]; then
+    echo -e "${RED}[ERROR]${NC} Could not determine test timestamp"
+    exit 1
+fi
+
 echo -e "${BLUE}[INFO]${NC} Analyzing results from test run: ${latest_timestamp}"
+echo -e "${BLUE}[INFO]${NC} Model: ${model_name}"
+echo -e "${BLUE}[INFO]${NC} Category: ${category}"
+
+# Validate we have matching files
+matching_files=$(ls "${RESULTS_DIR}"/*"${latest_timestamp}".json 2>/dev/null | wc -l)
+if [[ $matching_files -eq 0 ]]; then
+    echo -e "${RED}[ERROR]${NC} No test result files found for timestamp ${latest_timestamp}"
+    exit 1
+fi
+echo ""
 
 # Generate analysis report
 report_file="${REPORTS_DIR}/analysis_${latest_timestamp}.md"
 
-cat > "${report_file}" << 'EOF'
+cat > "${report_file}" << EOF
 # Ollama Model Testing Results Analysis
 
 ## Executive Summary
 
-This report presents the results of comprehensive testing performed on two Ollama models:
-- **qwen2.5-coder:7b** - Coding assistance and software development tasks
-- **mistral-nemo:12b** - Data processing and correlation tasks
+This report presents the results of testing performed on the **${model_name}** model
+with the **${category}** test category using the Interactive Testing Framework v2.0.
+
+### Test Configuration
+- **Model:** ${model_name}
+- **Test Category:** ${category}
+- **Test Framework:** Interactive Selection (v2.0)
+- **Timestamp:** ${latest_timestamp}
 
 ## Test Execution Overview
 
@@ -53,117 +156,205 @@ echo "**Test Run Timestamp:** ${latest_timestamp}" >> "${report_file}"
 echo "**Total Test Cases:** $(ls ${RESULTS_DIR}/*${latest_timestamp}.json | wc -l)" >> "${report_file}"
 echo "" >> "${report_file}"
 
-# Analyze qwen2.5-coder results
-echo "## qwen2.5-coder:7b Results" >> "${report_file}"
-echo "" >> "${report_file}"
-echo "| Test ID | Test Name | Duration (s) | Tokens/sec | Status |" >> "${report_file}"
-echo "|---------|-----------|--------------|------------|--------|" >> "${report_file}"
+# Function to analyze results by category
+analyze_by_category() {
+    local test_pattern="$1"
+    local category_name="$2"
+    local category_desc="$3"
+    
+    echo "## ${category_name}" >> "${report_file}"
+    echo "*${category_desc}*" >> "${report_file}"
+    echo "" >> "${report_file}"
+    echo "| Test ID | Test Name | Duration (s) | Tokens/sec | Status |" >> "${report_file}"
+    echo "|---------|-----------|--------------|------------|--------|" >> "${report_file}"
 
-for result_file in "${RESULTS_DIR}"/qc*"${latest_timestamp}".json; do
-    if [[ -f "${result_file}" ]]; then
-        test_id=$(jq -r '.test_case.id' "${result_file}")
-        test_title=$(jq -r '.test_case.title' "${result_file}")
-        duration=$(jq -r '.metrics.quantitative.latency_ms / 1000' "${result_file}")
-        tokens_per_sec=$(jq -r '.metrics.quantitative.tokens_per_second' "${result_file}")
-        result=$(jq -r '.overall_result' "${result_file}")
-        
-        echo "| ${test_id} | ${test_title} | ${duration} | ${tokens_per_sec} | ${result} |" >> "${report_file}"
+    local found_tests=false
+    local test_count=0
+    
+    for result_file in "${RESULTS_DIR}"/${test_pattern}*"${latest_timestamp}".json; do
+        if [[ -f "${result_file}" ]]; then
+            # Validate JSON structure before processing
+            if ! jq -e '.test_case.id' "$result_file" >/dev/null 2>&1; then
+                echo -e "${YELLOW}[WARNING]${NC} Skipping malformed JSON: $(basename "$result_file")" >&2
+                continue
+            fi
+            
+            found_tests=true
+            test_count=$((test_count + 1))
+            
+            test_id=$(jq -r '.test_case.id' "${result_file}" 2>/dev/null || echo "unknown")
+            test_title=$(jq -r '.test_case.title' "${result_file}" 2>/dev/null || echo "unknown")
+            
+            # Safe numeric parsing with fallbacks
+            latency_ms=$(jq -r '.metrics.quantitative.latency_ms // 0' "${result_file}" 2>/dev/null || echo "0")
+            duration=$(echo "scale=3; ${latency_ms} / 1000" | bc 2>/dev/null || echo "0")
+            
+            tokens_per_sec=$(jq -r '.metrics.quantitative.tokens_per_second // 0' "${result_file}" 2>/dev/null || echo "0")
+            result_status=$(jq -r '.overall_result // "unknown"' "${result_file}" 2>/dev/null || echo "unknown")
+            
+            echo "| ${test_id} | ${test_title} | ${duration} | ${tokens_per_sec} | ${result_status} |" >> "${report_file}"
+        fi
+    done
+    
+    if [[ "$found_tests" == false ]]; then
+        echo "| - | No tests found for this category | - | - | - |" >> "${report_file}"
+    else
+        echo -e "${BLUE}[INFO]${NC} Found ${test_count} tests for pattern '${test_pattern}'" >&2
+    fi
+    
+    echo "" >> "${report_file}"
+}
+
+# Analyze results based on category
+case "$category" in
+    "coding")
+        analyze_by_category "ct" "Coding Tests Results" "Algorithm implementation, optimization, debugging, and code quality tests"
+        ;;
+    "data")
+        analyze_by_category "dt" "Data Analysis Tests Results" "CSV processing, correlation, business intelligence, and reporting tests"
+        ;;
+    "all")
+        analyze_by_category "ct" "Coding Tests Results" "Algorithm implementation, optimization, debugging, and code quality tests"
+        analyze_by_category "dt" "Data Analysis Tests Results" "CSV processing, correlation, business intelligence, and reporting tests"
+        ;;
+    *)
+        echo -e "${YELLOW}[WARNING]${NC} Unknown category: ${category}. Analyzing all available tests."
+        analyze_by_category "ct" "Coding Tests Results" "Algorithm implementation, optimization, debugging, and code quality tests"
+        analyze_by_category "dt" "Data Analysis Tests Results" "CSV processing, correlation, business intelligence, and reporting tests"
+        ;;
+esac
+
+# Add model performance analysis
+echo "## Model Performance Analysis" >> "${report_file}"
+echo "" >> "${report_file}"
+echo "**Model:** ${model_name}" >> "${report_file}"
+
+# Calculate averages with proper error handling
+test_files=("${RESULTS_DIR}"/*"${latest_timestamp}".json)
+valid_files=()
+
+# Filter valid JSON files
+for file in "${test_files[@]}"; do
+    if [[ -f "$file" ]] && jq -e '.metrics.quantitative' "$file" >/dev/null 2>&1; then
+        valid_files+=("$file")
     fi
 done
 
-echo "" >> "${report_file}"
-
-# Analyze mistral-nemo results
-echo "## mistral-nemo:12b Results" >> "${report_file}"
-echo "" >> "${report_file}"
-echo "| Test ID | Test Name | Duration (s) | Tokens/sec | Status |" >> "${report_file}"
-echo "|---------|-----------|--------------|------------|--------|" >> "${report_file}"
-
-for result_file in "${RESULTS_DIR}"/mn*"${latest_timestamp}".json; do
-    if [[ -f "${result_file}" ]]; then
-        test_id=$(jq -r '.test_case.id' "${result_file}")
-        test_title=$(jq -r '.test_case.title' "${result_file}")
-        duration=$(jq -r '.metrics.quantitative.latency_ms / 1000' "${result_file}")
-        tokens_per_sec=$(jq -r '.metrics.quantitative.tokens_per_second' "${result_file}")
-        result=$(jq -r '.overall_result' "${result_file}")
-        
-        echo "| ${test_id} | ${test_title} | ${duration} | ${tokens_per_sec} | ${result} |" >> "${report_file}"
-    fi
-done
-
-# Performance summary
-cat >> "${report_file}" << 'EOF'
-
-## Performance Analysis
-
-### qwen2.5-coder:7b Performance
-EOF
-
-qwen_avg_duration=$(jq -s 'map(select(.model.name | contains("qwen")) | .metrics.quantitative.latency_ms / 1000) | add / length' "${RESULTS_DIR}"/*"${latest_timestamp}".json)
-qwen_avg_tokens_sec=$(jq -s 'map(select(.model.name | contains("qwen")) | .metrics.quantitative.tokens_per_second) | add / length' "${RESULTS_DIR}"/*"${latest_timestamp}".json)
-
-echo "- **Average Response Time:** ${qwen_avg_duration} seconds" >> "${report_file}"
-echo "- **Average Throughput:** ${qwen_avg_tokens_sec} tokens/second" >> "${report_file}"
-echo "" >> "${report_file}"
-
-echo "### mistral-nemo:12b Performance" >> "${report_file}"
-
-mistral_avg_duration=$(jq -s 'map(select(.model.name | contains("mistral")) | .metrics.quantitative.latency_ms / 1000) | add / length' "${RESULTS_DIR}"/*"${latest_timestamp}".json)
-mistral_avg_tokens_sec=$(jq -s 'map(select(.model.name | contains("mistral")) | .metrics.quantitative.tokens_per_second) | add / length' "${RESULTS_DIR}"/*"${latest_timestamp}".json)
-
-echo "- **Average Response Time:** ${mistral_avg_duration} seconds" >> "${report_file}"
-echo "- **Average Throughput:** ${mistral_avg_tokens_sec} tokens/second" >> "${report_file}"
+if [[ ${#valid_files[@]} -gt 0 ]]; then
+    # Calculate averages safely
+    avg_duration=$(printf '%s\n' "${valid_files[@]}" | xargs -I {} jq -r '.metrics.quantitative.latency_ms // 0' {} | awk '{sum += $1; count++} END {if (count > 0) printf "%.3f", sum/count/1000; else print "0"}')
+    avg_tokens_sec=$(printf '%s\n' "${valid_files[@]}" | xargs -I {} jq -r '.metrics.quantitative.tokens_per_second // 0' {} | awk '{sum += $1; count++} END {if (count > 0) printf "%.2f", sum/count; else print "0"}')
+    
+    echo "- **Average Response Time:** ${avg_duration} seconds" >> "${report_file}"
+    echo "- **Average Throughput:** ${avg_tokens_sec} tokens/second" >> "${report_file}"
+    echo "- **Total Test Cases:** ${#valid_files[@]}" >> "${report_file}"
+else
+    echo "- **Error:** No valid test data found for performance analysis" >> "${report_file}"
+fi
 echo "" >> "${report_file}"
 
 # Add evaluation process section
 cat >> "${report_file}" << 'EOF'
 ## Quality Evaluation Process
 
-Model outputs will be evaluated by Claude AI for:
+### Step-by-Step Evaluation Guide
 
-### For All Tests:
-- **Correctness:** Does the output meet the specified requirements?
-- **Completeness:** Are all requested components present?
-- **Clarity:** Is the output clear and well-explained?
+#### 1. Prepare for Evaluation
+- Run `./scripts/clean-outputs.sh` to generate cleaned output files
+- Review test specifications in `test-plans/` directory
+- Open outputs in `outputs/` directory alongside this report
 
-### For qwen2.5-coder:7b:
-- Code quality and adherence to best practices
-- Accuracy of algorithm implementations
-- Quality of documentation and explanations
-- Handling of edge cases
+#### 2. Evaluate Each Response
 
-### For mistral-nemo:12b:
-- Accuracy of data extraction and analysis
-- Quality of cross-source correlations
-- Insight generation and business value
-- Handling of inconsistent data
+**For Coding Tests (ct01-ct06):**
+- ✅ **Correctness**: Does code compile and solve the problem?
+- ✅ **Best Practices**: Follows language conventions and patterns?
+- ✅ **Documentation**: Clear comments and explanations?
+- ✅ **Edge Cases**: Handles errors and boundary conditions?
+- **Score**: Rate 1-10 (1=Poor, 5=Adequate, 8=Good, 10=Excellent)
 
-## Next Steps
+**For Data Analysis Tests (dt01-dt06):**
+- ✅ **Data Accuracy**: Correctly processes and analyzes data?
+- ✅ **Insights Quality**: Generates meaningful business insights?
+- ✅ **Completeness**: Addresses all analysis requirements?
+- ✅ **Presentation**: Clear formatting and explanations?
+- **Score**: Rate 1-10 (1=Poor, 5=Adequate, 8=Good, 10=Excellent)
 
-1. **Claude Evaluation:** AI will assess all outputs for quality and correctness
-2. **Comparative Analysis:** Compare models within their respective domains
-3. **Final Report:** Generate comprehensive findings and recommendations
+#### 3. Assessment Criteria
 
-## Files for Review
+**Scoring Guidelines:**
+- **9-10**: Exceptional quality, production-ready
+- **7-8**: Good quality with minor improvements needed
+- **5-6**: Adequate but requires significant refinement
+- **3-4**: Basic attempt with major issues
+- **1-2**: Poor quality or incorrect approach
+
+#### 4. Record Your Findings
+- Note specific strengths and weaknesses for each test
+- Calculate average scores per category
+- Identify patterns in model performance
+- Document recommendations for model usage
+
+## Evaluation Template
+
+Copy this template to document your assessment:
+
+```
+Model: [MODEL_NAME]
+Category: [CATEGORY]
+Date: [DATE]
+
+Test Scores:
+- ct01/dt01: [1-10] - [brief note]
+- ct02/dt02: [1-10] - [brief note]
+- ct03/dt03: [1-10] - [brief note]
+- ct04/dt04: [1-10] - [brief note]
+- ct05/dt05: [1-10] - [brief note]
+- ct06/dt06: [1-10] - [brief note]
+
+Average Score: [X.X/10]
+Overall Rating: [Poor/Adequate/Good/Excellent]
+
+Strengths:
+- [Key strength 1]
+- [Key strength 2]
+
+Areas for Improvement:
+- [Issue 1]
+- [Issue 2]
+
+Recommendations:
+- [Usage recommendation]
+```
 
 EOF
 
 echo "### Output Files" >> "${report_file}"
+output_count=0
 for output_file in "${OUTPUTS_DIR}"/*"${latest_timestamp}".out; do
     if [[ -f "${output_file}" ]]; then
         filename=$(basename "${output_file}")
         echo "- \`${filename}\`" >> "${report_file}"
+        output_count=$((output_count + 1))
     fi
 done
+if [[ $output_count -eq 0 ]]; then
+    echo "- No output files found for this timestamp" >> "${report_file}"
+fi
 
 echo "" >> "${report_file}"
 echo "### Result Files" >> "${report_file}"
+result_count=0
 for result_file in "${RESULTS_DIR}"/*"${latest_timestamp}".json; do
     if [[ -f "${result_file}" ]]; then
         filename=$(basename "${result_file}")
         echo "- \`${filename}\`" >> "${report_file}"
+        result_count=$((result_count + 1))
     fi
 done
+if [[ $result_count -eq 0 ]]; then
+    echo "- No result files found for this timestamp" >> "${report_file}"
+fi
 
 echo "" >> "${report_file}"
 echo "---" >> "${report_file}"
@@ -172,12 +363,37 @@ echo "*Report generated on $(date)*" >> "${report_file}"
 echo -e "${GREEN}[SUCCESS]${NC} Analysis report generated: ${report_file}"
 echo ""
 echo -e "${YELLOW}Summary:${NC}"
-echo "- qwen2.5-coder:7b average response time: ${qwen_avg_duration}s"
-echo "- mistral-nemo:12b average response time: ${mistral_avg_duration}s"
+echo "- Model tested: ${model_name}"
+echo "- Category: ${category}"
 echo "- Total test cases: $(ls ${RESULTS_DIR}/*${latest_timestamp}.json | wc -l)"
 echo ""
+echo -e "${BLUE}Interactive Testing Framework v2.0 Features:${NC}"
+echo "✓ Dynamic model selection from available Ollama models"
+echo "✓ Category-based testing (Coding/Data Analysis/All)"
+echo "✓ Flexible test execution with any model"
+echo "✓ Enhanced result analysis and reporting"
+
+echo ""
 echo -e "${BLUE}Next steps:${NC}"
-echo "1. Open ${report_file} to review the full analysis"
-echo "2. Clean outputs with ./scripts/clean-outputs.sh if needed"
-echo "3. Claude will evaluate response quality automatically"
-echo "4. Consider running additional tests based on findings"
+echo "1. Open ${report_file} to review the detailed analysis"
+
+# Check if cleaned outputs exist, if not offer to run clean script
+cleaned_outputs_exist=false
+if [[ -d "outputs_clean" ]] && [[ -n "$(ls -A outputs_clean/ 2>/dev/null)" ]]; then
+    cleaned_outputs_exist=true
+fi
+
+if [[ "$cleaned_outputs_exist" == true ]]; then
+    echo "2. Review cleaned outputs already available in outputs_clean/ directory"
+else
+    echo "2. Run ./scripts/clean-outputs.sh to generate cleaned output files (recommended)"
+fi
+
+echo "3. For manual evaluation, assess each response against:"
+echo "   • Accuracy: Meets requirements and specifications"
+echo "   • Completeness: All requested components present"  
+echo "   • Quality: Clear structure and good explanations"
+echo "   • Technical Merit: Sound approach and best practices"
+echo "4. Use the evaluation template in the report to document your assessment"
+echo "5. Consider running additional tests with different models"
+echo "6. Test other models: ./scripts/interactive-test-runner.sh"

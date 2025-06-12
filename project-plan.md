@@ -27,21 +27,22 @@ ollama-local-model-testing/
 │   └── sample-pdf-text/
 ├── outputs/
 ├── scripts/
-│   └── run-tests.sh
+│   ├── interactive-test-runner.sh
+│   └── analyze-results.sh
 └── schemas/
     └── test-results-schema.json
 ```
 
-### Phase 2: Model A (qwen2.5-coder:7b) Test Plan
+### Phase 2: Coding Tests Category (CT-01 to CT-06)
 
 Create 6 comprehensive test cases focusing on coding scenarios:
 
-1. **QC-01: Function Implementation** - Basic algorithm implementation from specification
-2. **QC-02: Code Refactoring** - Performance optimization of existing code
-3. **QC-03: Bug Fixing** - Debug and fix broken code with logical errors
-4. **QC-04: Code Review** - Analyze code and suggest improvements
-5. **QC-05: Documentation Generation** - Create docstrings and inline comments
-6. **QC-06: API Integration** - Write code using external APIs and libraries
+1. **CT-01: Function Implementation** - Basic algorithm implementation from specification
+2. **CT-02: Code Refactoring** - Performance optimization of existing code
+3. **CT-03: Bug Fixing** - Debug and fix broken code with logical errors
+4. **CT-04: Code Review** - Analyze code and suggest improvements
+5. **CT-05: Documentation Generation** - Create docstrings and inline comments
+6. **CT-06: API Integration** - Write code using external APIs and libraries
 
 **Success Criteria:**
 - Produces syntactically correct code
@@ -50,16 +51,16 @@ Create 6 comprehensive test cases focusing on coding scenarios:
 - Provides clear explanations
 - Handles edge cases appropriately
 
-### Phase 3: Model B (mistral-nemo:12b) Test Plan
+### Phase 3: Data Analysis Tests Category (DT-01 to DT-06)
 
 Create 6 comprehensive test cases for data processing and correlation:
 
-1. **MN-01: CSV Data Analysis** - Extract insights and patterns from spreadsheet data
-2. **MN-02: Email Thread Correlation** - Connect related information across email chains
-3. **MN-03: Multi-source Data Fusion** - Combine and correlate CSV + email + PDF text
-4. **MN-04: Data Validation** - Check consistency and identify discrepancies across sources
-5. **MN-05: Report Generation** - Create structured summaries from heterogeneous data
-6. **MN-06: Pattern Recognition** - Identify trends and anomalies across data types
+1. **DT-01: CSV Data Analysis** - Extract insights and patterns from spreadsheet data
+2. **DT-02: Email Thread Correlation** - Connect related information across email chains
+3. **DT-03: Multi-source Data Fusion** - Combine and correlate CSV + email + PDF text
+4. **DT-04: Data Validation** - Check consistency and identify discrepancies across sources
+5. **DT-05: Report Generation** - Create structured summaries from heterogeneous data
+6. **DT-06: Pattern Recognition** - Identify trends and anomalies across data types
 
 **Success Criteria:**
 - Accurately extracts relevant information

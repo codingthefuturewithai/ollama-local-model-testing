@@ -1,26 +1,28 @@
-# Ollama Model Testing - Evaluation Methodology
+# Ollama Interactive Testing Framework - Evaluation Methodology
 
 ## Overview
 
-This document defines the standardized methodology for evaluating Ollama model outputs to ensure consistent, repeatable, and objective quality assessments across test runs.
+This document defines the standardized methodology for LLM-based qualitative evaluation of Ollama model outputs. It ensures consistent, repeatable, and objective quality assessments across any model and test category.
+
+**Important Note:** This methodology is for **qualitative assessment only**. The automated analysis script (`analyze-results.sh`) handles quantitative metrics (timing, tokens/sec, etc.) automatically.
 
 ## Evaluation Process
 
 ### Step 1: Preparation
-1. Ensure clean outputs are available in `outputs_clean/` directory
-2. Review test plans in `test-plans/` to understand original requirements
-3. Use latest test run timestamp for evaluation
+1. Ensure test outputs are available in `outputs/` directory
+2. Review test specifications in `test-plans/` to understand requirements
+3. Identify test run timestamp for evaluation
 
-### Step 2: Systematic Review
-For each test output:
-1. **Read Original Task** - From the corresponding test plan
-2. **Read Model Response** - From the cleaned output file
+### Step 2: LLM-Based Systematic Review
+For each test output, an evaluating LLM must:
+1. **Read Original Task** - From the test prompt and requirements
+2. **Read Model Response** - From the corresponding output file
 3. **Apply Scoring Criteria** - Using the standardized rubrics below
 4. **Document Assessment** - Using the standard format
 
 ## Scoring Criteria
 
-### For Coding Tasks (qwen2.5-coder:7b)
+### For Coding Tests (CT-01 to CT-06)
 
 **Correctness (0-10 points)**
 - 10: Perfect implementation, algorithm is correct, handles all edge cases
@@ -46,7 +48,7 @@ For each test output:
 - 1-3: Very poor style, hard to read
 - 0: Unreadable or no code provided
 
-### For Data Processing Tasks (mistral-nemo:12b)
+### For Data Analysis Tests (DT-01 to DT-06)
 
 **Correctness (0-10 points)**
 - 10: All data extracted/analyzed accurately, no factual errors
@@ -75,8 +77,8 @@ For each test output:
 ## Overall Scoring
 
 **Overall Score Calculation:**
-- Coding Tasks: (Correctness × 0.4) + (Completeness × 0.3) + (Code Quality × 0.3)
-- Data Tasks: (Correctness × 0.4) + (Completeness × 0.3) + (Insight Quality × 0.3)
+- Coding Tests: (Correctness × 0.4) + (Completeness × 0.3) + (Code Quality × 0.3)
+- Data Tests: (Correctness × 0.4) + (Completeness × 0.3) + (Insight Quality × 0.3)
 
 **Quality Ratings:**
 - 9.0-10.0: EXCELLENT - Exceptional quality, ready for production use
@@ -87,7 +89,7 @@ For each test output:
 
 ## Standard Evaluation Format
 
-For each test, document using this template:
+For each test, an evaluating LLM should document using this template:
 
 ```
 TEST ID: [test_id] ([Test Name])
@@ -116,55 +118,55 @@ VERDICT: [One-sentence summary]
 
 ## Test Case Specifications
 
-### qwen2.5-coder:7b Test Cases
+### Coding Tests (CT-01 to CT-06)
 
-**QC-01: Binary Search Implementation**
+**CT-01: Binary Search Implementation**
 - Required: Function implementation, O(log n) complexity, documentation, examples
 - Key evaluation points: Algorithm correctness, edge case handling, code style
 
-**QC-02: Performance Optimization**
+**CT-02: Performance Optimization**
 - Required: Analysis of provided code, specific optimizations, performance impact estimates
 - Key evaluation points: Accuracy of analysis, practicality of suggestions
 
-**QC-03: Bug Fixing**
+**CT-03: Bug Fixing**
 - Required: Identification of all bugs, correct fixes, explanation of issues
 - Key evaluation points: Complete bug identification, correct solutions
 
-**QC-04: Code Review**
+**CT-04: Code Review**
 - Required: Comprehensive analysis, security/performance/style issues, improvement suggestions
 - Key evaluation points: Thoroughness, accuracy of observations
 
-**QC-05: Documentation Generation**
+**CT-05: Documentation Generation**
 - Required: Complete API documentation, usage examples, formatting
 - Key evaluation points: Completeness, clarity, professional presentation
 
-**QC-06: API Integration**
+**CT-06: API Integration**
 - Required: Working code, error handling, documentation, examples
 - Key evaluation points: Functionality, robustness, usability
 
-### mistral-nemo:12b Test Cases
+### Data Analysis Tests (DT-01 to DT-06)
 
-**MN-01: CSV Data Analysis**
+**DT-01: CSV Data Analysis**
 - Required: Statistical summary, customer analysis, product performance, insights
 - Key evaluation points: Data accuracy, analysis depth, business relevance
 
-**MN-02: Email Thread Correlation**
+**DT-02: Email Thread Correlation**
 - Required: Order identification, timeline construction, issue correlation
 - Key evaluation points: Information extraction accuracy, logical connections
 
-**MN-03: Multi-source Data Fusion**
+**DT-03: Multi-source Data Fusion**
 - Required: Cross-reference data sources, identify relationships, synthesize insights
 - Key evaluation points: Integration accuracy, insight quality
 
-**MN-04: Data Validation**
+**DT-04: Data Validation**
 - Required: Identify inconsistencies, validate data quality, recommend fixes
 - Key evaluation points: Issue identification accuracy, solution practicality
 
-**MN-05: Executive Report Generation**
+**DT-05: Executive Report Generation**
 - Required: Professional summary, key metrics, strategic insights, formatting
 - Key evaluation points: Business relevance, presentation quality
 
-**MN-06: Pattern Recognition**
+**DT-06: Pattern Recognition**
 - Required: Identify trends, behavioral patterns, predictive insights
 - Key evaluation points: Pattern accuracy, insight depth, actionability
 
@@ -197,15 +199,68 @@ Generate individual assessments for each test using the standard format.
 - Recommendations for use cases
 
 ### Final Summary
-- Overall model rankings
-- Best-fit scenarios for each model
+- Overall model performance assessment
+- Best-fit scenarios for tested models
 - Areas for improvement
 - Confidence levels in assessments
 
+## LLM Evaluation Instructions
+
+When using an LLM to evaluate test outputs, provide these explicit instructions:
+
+**Context Setup:**
+```
+You are evaluating the output of an Ollama language model against a specific test case. 
+Use the standardized scoring criteria below to ensure consistent assessment.
+
+Test Details:
+- Test ID: [test_id]
+- Test Category: [coding/data]
+- Model Tested: [model_name]
+- Original Prompt: [full_prompt_text]
+- Model Output: [full_output_text]
+```
+
+**Evaluation Instructions:**
+```
+Evaluate this output using exactly these criteria:
+
+For Coding Tests (CT-01 to CT-06):
+1. Correctness (0-10): [criteria from above]
+2. Completeness (0-10): [criteria from above]  
+3. Code Quality (0-10): [criteria from above]
+
+For Data Tests (DT-01 to DT-06):
+1. Correctness (0-10): [criteria from above]
+2. Completeness (0-10): [criteria from above]
+3. Insight Quality (0-10): [criteria from above]
+
+Provide your assessment in the Standard Evaluation Format.
+Calculate the overall score using the specified weightings.
+Be specific about strengths and weaknesses with examples.
+```
+
+## Framework Integration
+
+**Automated Analysis Script:**
+- Handles quantitative metrics (timing, tokens/sec, etc.)
+- Generates analysis reports with performance data
+- Cannot assess qualitative aspects
+
+**Manual LLM Evaluation:**
+- Uses this methodology for consistent qualitative assessment
+- Requires evaluating LLM to see both inputs and outputs
+- Produces standardized quality scores and recommendations
+
+**Combined Reporting:**
+- Quantitative metrics from automated analysis
+- Qualitative scores from LLM evaluation
+- Comprehensive model assessment
+
 ## Revision History
 
+- v2.0 (2025-06-11): Updated for Interactive Testing Framework - model-agnostic with CT-*/DT-* naming
 - v1.0 (2025-06-11): Initial methodology established
-- Future versions should document changes and rationale
 
 ---
 
