@@ -22,10 +22,14 @@ class ConfigLoader:
     
     def load_test_category(self, category_id: str) -> Dict[str, Any]:
         """Load a test category configuration."""
+        # First try the direct mapping
         config_file = self.categories_dir / f"{category_id}-tests.yaml"
         
+        # If direct mapping doesn't work, search for the correct file
         if not config_file.exists():
-            raise FileNotFoundError(f"Test category config not found: {config_file}")
+            config_file = self._find_category_file(category_id)
+            if not config_file:
+                raise FileNotFoundError(f"Test category config not found for ID: {category_id}")
         
         with open(config_file, 'r') as f:
             config = yaml.safe_load(f)
@@ -33,6 +37,19 @@ class ConfigLoader:
         # Validate basic structure
         self._validate_category_config(config)
         return config
+    
+    def _find_category_file(self, category_id: str) -> Optional[Path]:
+        """Find the YAML file that contains the given category ID."""
+        for yaml_file in self.categories_dir.glob("*-tests.yaml"):
+            try:
+                with open(yaml_file, 'r') as f:
+                    config = yaml.safe_load(f)
+                    if 'category' in config and 'id' in config['category']:
+                        if config['category']['id'] == category_id:
+                            return yaml_file
+            except Exception:
+                continue
+        return None
     
     def load_data_sources(self, source_file: str = "common-sources.yaml") -> Dict[str, Any]:
         """Load data source configurations."""
@@ -53,9 +70,21 @@ class ConfigLoader:
         
         categories = []
         for yaml_file in self.categories_dir.glob("*-tests.yaml"):
-            # Extract category ID from filename (e.g., "coding-tests.yaml" -> "coding")
-            category_id = yaml_file.stem.replace("-tests", "")
-            categories.append(category_id)
+            try:
+                # Load the YAML file to get the actual category ID
+                with open(yaml_file, 'r') as f:
+                    config = yaml.safe_load(f)
+                    if 'category' in config and 'id' in config['category']:
+                        category_id = config['category']['id']
+                        categories.append(category_id)
+                    else:
+                        # Fallback to filename-based extraction
+                        category_id = yaml_file.stem.replace("-tests", "")
+                        categories.append(category_id)
+            except Exception:
+                # If YAML loading fails, fall back to filename-based extraction
+                category_id = yaml_file.stem.replace("-tests", "")
+                categories.append(category_id)
         
         return sorted(categories)
     
@@ -174,24 +203,78 @@ class DataSourceProcessor:
     
     def _combine_multi_sources(self, config: Dict[str, Any]) -> str:
         """Combine multiple data sources."""
-        # This would reference other sources by ID
-        # For now, return placeholder
-        return "[MULTI_SOURCE_NOT_IMPLEMENTED]"
+        sources = config.get("sources", [])
+        if not sources:
+            return "[NO_SOURCES_SPECIFIED]"
+        
+        # Load the common sources configuration
+        try:
+            # Use ConfigLoader to load data sources
+            config_loader = ConfigLoader()
+            data_sources_config = config_loader.load_data_sources()
+            combined_content = []
+            
+            for source_id in sources:
+                # Find the source config by ID
+                source_config = None
+                for src in data_sources_config.get("data_sources", []):
+                    if src["id"] == source_id:
+                        source_config = src
+                        break
+                
+                if source_config:
+                    content = self.process_data_source(source_config)
+                    combined_content.append(f"=== {source_id} ===\n{content}\n")
+                else:
+                    combined_content.append(f"=== {source_id} ===\n[SOURCE_NOT_FOUND]\n")
+            
+            return "\n".join(combined_content)
+        except Exception as e:
+            return f"[ERROR_COMBINING_SOURCES: {str(e)}]"
 
 class PromptBuilder:
     """Build prompts from templates with data source substitution."""
     
     def __init__(self, data_processor: DataSourceProcessor):
         self.data_processor = data_processor
+        self.config_loader = ConfigLoader()
     
     def build_prompt(self, template: str, data_sources: List[Dict[str, Any]]) -> str:
         """Build a prompt from template with data source substitution."""
         prompt = template
         
+        # Load common data sources config
+        try:
+            common_sources_config = self.config_loader.load_data_sources()
+            common_sources = common_sources_config.get("data_sources", [])
+        except Exception as e:
+            print(f"Warning: Could not load common data sources: {e}")
+            common_sources = []
+        
         # Process each data source and substitute in template
-        for source_config in data_sources:
-            source_id = source_config["id"]
-            content = self.data_processor.process_data_source(source_config)
+        for source_ref in data_sources:
+            # Handle both string IDs and dict formats
+            if isinstance(source_ref, str):
+                source_id = source_ref
+                source_config = None
+            else:
+                source_id = source_ref["id"]
+                # For dict format, use as potential inline definition
+                source_config = source_ref
+            
+            # Find the full source config by ID - check common sources first
+            if not source_config or source_id != source_config.get("id"):
+                for src in common_sources:
+                    if src["id"] == source_id:
+                        source_config = src
+                        break
+            
+            # If not found in common sources and no inline definition, create placeholder
+            if not source_config:
+                content = f"[DATA_SOURCE_NOT_FOUND: {source_id}]"
+            else:
+                # Process the source (from common sources or inline)
+                content = self.data_processor.process_data_source(source_config)
             
             # Replace template variables like {data_sources.source_id}
             template_var = f"{{data_sources.{source_id}}}"

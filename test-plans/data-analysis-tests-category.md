@@ -197,7 +197,7 @@ Identify patterns, trends, and anomalies across all data sources.
 
 Use the Interactive Test Runner:
 ```bash
-./scripts/interactive-test-runner.sh
+./scripts/run-tests.sh
 ```
 
 Select any available model and choose "Data Analysis Tests" category.

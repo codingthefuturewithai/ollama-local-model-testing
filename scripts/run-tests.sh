@@ -2,7 +2,7 @@
 
 # Generic Test Runner - Configuration-Driven Architecture
 # Uses Python for YAML processing, shell for execution orchestration
-# Zero external dependencies beyond Python standard library
+# Optional external dependencies for enhanced features (qualitative evaluation)
 
 set -e
 
@@ -48,7 +48,7 @@ if [[ "$HELP" == true ]]; then
     echo "Usage: $0 [OPTIONS]"
     echo ""
     echo "=== Generic Configuration-Driven Test Runner v3.0 ==="
-    echo "Zero External Dependencies - Python + Shell Only"
+    echo "YAML-Driven Test Execution with Optional Enhanced Features"
     echo ""
     echo "Description:"
     echo "  Interactive test runner that dynamically detects available Ollama models"
@@ -396,7 +396,7 @@ except Exception as e:
 # Main execution flow
 main() {
     echo -e "${GREEN}=== Generic Configuration-Driven Test Runner v3.0 ===${NC}"
-    echo -e "${BLUE}Zero External Dependencies - Python + Shell Only${NC}"
+    echo -e "${BLUE}YAML-Driven Test Execution with Optional Enhanced Features${NC}"
     echo ""
 
     log "Starting configuration-driven test execution"

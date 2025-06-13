@@ -1,7 +1,7 @@
 # Test Plan: Coding Tests Category
 **Framework Version:** 2.0 - Interactive Model Selection  
 **Category:** Coding & Software Development  
-**Test Count:** 6 tests  
+**Test Count:** 7 tests  
 **Suitable for:** Any coding-focused language model
 
 ## Overview
@@ -147,6 +147,43 @@ Create a production-ready Python class for REST API interactions.
 - **Completeness (30%):** All requirements implemented
 - **Code Quality (30%):** Production-ready code with proper error handling
 
+---
+
+### CT-07: Complex App Refactoring
+**Objective:** Evaluate the model's ability to refactor a multi-module application for improved structure, testability, and code quality, including adding unit test scaffolding.
+**Complexity:** High
+**Expected Duration:** 180-300 seconds
+
+**Test Description:**
+The model is provided with a simple command-line task manager application spread across three Python modules (`main_app.py`, `logic.py`, `utils.py`). The task is to refactor this application, improve its structure, enhance testability, and add `pytest` scaffolding for unit tests.
+
+**Input:**
+The source code for the "Simple Command-Line Task Manager":
+- `main_app.py`: Handles command-line interaction and user interface.
+- `logic.py`: Contains the core `Task` and `TaskManager` classes and business logic.
+- `utils.py`: Provides utility functions, such as loading and saving tasks to a JSON file.
+
+**Requirements:**
+- Analyze the existing application structure across the three provided modules.
+- Propose and implement refactoring changes to improve modularity, readability, and maintainability (e.g., better class design, separation of concerns, use of type hints).
+- Ensure the core functionality of the task manager (adding, viewing, completing, saving, loading tasks) remains intact after refactoring.
+- Add `pytest` compatible unit test scaffolding for the core logic in the `logic.py` module. This should include:
+    - A new test file (e.g., `test_logic.py`).
+    - Example test cases for `TaskManager` methods like adding a task, listing tasks, completing a task, and potentially edge cases.
+    - Mocks or stubs for file I/O operations if necessary for testing the logic in isolation.
+- Provide a brief explanation of:
+    - The key refactoring decisions made and their benefits.
+    - The structure of the `pytest` test scaffolding and how to run the tests.
+    - Any assumptions made during the refactoring process.
+
+**Evaluation Criteria:**
+- **Refactoring Quality (40%):** Effectiveness of the structural improvements, adherence to Python best practices, improved clarity and organization.
+- **Test Scaffolding (30%):** Correctness and completeness of the `pytest` scaffolding, relevance and coverage of example test cases, proper use of testing concepts (e.g., mocks).
+- **Explanation (20%):** Clarity, conciseness, and insightfulness of the explanation for refactoring choices and testing strategy.
+- **Code Quality (10%):** Readability, style, comments, and type hinting in the refactored code and new test files.
+
+---
+
 ## Success Criteria
 
 ### Overall Category Performance
@@ -168,7 +205,7 @@ Create a production-ready Python class for REST API interactions.
 
 Use the Interactive Test Runner:
 ```bash
-./scripts/interactive-test-runner.sh
+./scripts/run-tests.sh
 ```
 
 Select any available model and choose "Coding Tests" category.

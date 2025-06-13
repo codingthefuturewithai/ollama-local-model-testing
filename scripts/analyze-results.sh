@@ -72,7 +72,7 @@ echo ""
 # Check if we have results
 if [[ ! -d "${RESULTS_DIR}" ]] || [[ -z "$(ls -A ${RESULTS_DIR}/*.json 2>/dev/null)" ]]; then
     echo -e "${RED}[ERROR]${NC} No test results found in ${RESULTS_DIR}/"
-    echo "Please run './scripts/interactive-test-runner.sh' first."
+    echo "Please run './scripts/run-tests.sh' first."
     exit 1
 fi
 
@@ -586,4 +586,4 @@ echo "$next_step. Use the evaluation template in the report to document your ass
 next_step=$((next_step + 1))
 echo "$next_step. Consider running additional tests with different models"
 next_step=$((next_step + 1))
-echo "$next_step. Test other models: ./scripts/interactive-test-runner.sh"
+echo "$next_step. Test other models: ./scripts/run-tests.sh"

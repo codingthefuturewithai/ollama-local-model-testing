@@ -60,15 +60,40 @@ def validate_all_configurations():
                 
                 # Test data source processing if present
                 if 'data_sources' in test:
+                    # Load common sources config (like PromptBuilder does)
+                    try:
+                        common_sources_config = loader.load_data_sources()
+                        common_sources = common_sources_config.get("data_sources", [])
+                    except Exception as e:
+                        print(f"      ⚠️  Could not load common sources: {e}")
+                        common_sources = []
+                    
                     for ds in test['data_sources']:
-                        try:
-                            content = data_processor.process_data_source(ds)
-                            if content:
-                                print(f"      ✅ Data source '{ds['id']}': {len(content)} chars")
-                            else:
-                                print(f"      ⚠️  Data source '{ds['id']}': empty content")
-                        except Exception as e:
-                            print(f"      ❌ Data source '{ds['id']}' failed: {e}")
+                        # Handle both string IDs and dict formats
+                        if isinstance(ds, str):
+                            source_id = ds
+                        else:
+                            source_id = ds['id']
+                        
+                        # Find the full source config by ID (like PromptBuilder does)
+                        source_config = None
+                        for src in common_sources:
+                            if src["id"] == source_id:
+                                source_config = src
+                                break
+                        
+                        if source_config:
+                            try:
+                                content = data_processor.process_data_source(source_config)
+                                if content:
+                                    print(f"      ✅ Data source '{source_id}': {len(content)} chars")
+                                else:
+                                    print(f"      ⚠️  Data source '{source_id}': empty content")
+                            except Exception as e:
+                                print(f"      ❌ Data source '{source_id}' failed: {e}")
+                                success = False
+                        else:
+                            print(f"      ❌ Data source '{source_id}' not found in common sources")
                             success = False
                 
                 # Test prompt building

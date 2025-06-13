@@ -93,3 +93,31 @@ data_sources:
       - "order_correspondence_emails"
       - "business_updates_emails"
     cache_ttl: 300
+  
+  # Complex App source modules for refactoring test
+  - id: "main_app_code" # Renamed from module1_code
+    type: "file_content"
+    description: "Complex app main entry point"
+    file: "test-data/complex-app/main_app.py"
+    cache_ttl: 600
+
+  - id: "logic_code" # Renamed from module2_code
+    type: "file_content"
+    description: "Complex app core logic module"
+    file: "test-data/complex-app/logic.py"
+    cache_ttl: 600
+
+  - id: "utils_code" # New module for utilities
+    type: "file_content"
+    description: "Complex app utility functions module"
+    file: "test-data/complex-app/utils.py"
+    cache_ttl: 600
+
+  - id: "complex_app"
+    type: "multi_source"
+    description: "All modules for complex-app refactoring (Task Manager)"
+    sources:
+      - "main_app_code"
+      - "logic_code"
+      - "utils_code" # Added utils_code
+    cache_ttl: 300
