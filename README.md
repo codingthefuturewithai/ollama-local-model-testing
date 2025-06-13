@@ -14,18 +14,58 @@ A YAML-driven testing framework for evaluating any Ollama language model against
 ## Quick Start
 
 ### Prerequisites
+
+**Required Software:**
+- **Python 3.9+** (for configuration processing and optional AI evaluation)
+- **Ollama** - Download from [ollama.ai](https://ollama.ai)
+- **System utilities:** `jq` and `bc` (for JSON processing and calculations)
+
+**Install System Dependencies:**
 ```bash
-# Install Ollama and pull a model
+# macOS
+brew install jq bc
+
+# Ubuntu/Debian
+sudo apt-get update && sudo apt-get install jq bc
+
+# CentOS/RHEL/Fedora
+sudo yum install jq bc  # or sudo dnf install jq bc
+```
+
+**Setup Ollama and Pull a Model:**
+```bash
+# After installing Ollama, pull at least one model
 ollama pull qwen2.5-coder:7b
+```
 
-# Install system dependencies
-brew install jq bc  # macOS
+**Setup Python Environment:**
+```bash
+# Create and activate virtual environment (recommended)
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Setup Python environment (optional - for AI evaluation)
+# Install Python dependencies (optional - for AI evaluation features)
 cp .env.example .env
 # Add your GOOGLE_API_KEY to .env for automated scoring
 pip install -r requirements.txt
 ```
+
+### Hardware Requirements
+
+**Important**: While quantized models are designed to run on commodity hardware, your system specifications directly impact both speed and quality of results.
+
+**Official Ollama Memory Requirements** ([source](https://github.com/ollama/ollama#model-library)):
+- **7B models**: At least 8GB RAM available
+- **13B models**: At least 16GB RAM available  
+- **33B+ models**: At least 32GB RAM available
+
+**Performance Considerations:**
+- **CPU-only**: Functional but slow, especially for larger models (minutes per response)
+- **GPU-accelerated**: Significantly faster inference (seconds per response)
+- **Memory pressure**: Insufficient RAM causes swapping, severely degrading performance
+- **Test execution time**: Hardware profile directly affects completion time (30min to 3+ hours for full suite)
+
+💡 **Recommendation**: Check model size with `ollama show <model>` and ensure your system meets minimum requirements. GPU acceleration through CUDA/Metal is strongly recommended for faster inference, especially with larger models.
 
 ### Run Your First Test
 ```bash
@@ -36,14 +76,15 @@ pip install -r requirements.txt
 # 1. Select your model
 # 2. Choose test category (coding/data-analysis/all)
 # 3. Watch real-time execution
+# 4. Click the generated link to view your test report
 ```
 
-### View Results
+### View Previous Results
 ```bash
-# Generate analysis report
+# Re-generate analysis report from previous test runs
 ./scripts/analyze-results.sh --with-qualitative-eval
 
-# Results saved to:
+# All results are automatically saved during test execution to:
 # - reports/analysis_TIMESTAMP.md (main report)
 # - outputs/ctXX_TIMESTAMP.out (raw responses)  
 # - results/ctXX_TIMESTAMP.json (structured data)
@@ -61,6 +102,26 @@ pip install -r requirements.txt
 - Data validation, executive reporting, pattern recognition
 
 See [TESTING-GUIDE.md](TESTING-GUIDE.md) for detailed test descriptions and evaluation criteria.
+
+## Model Selection Guidance
+
+Different language models are optimized for different types of tasks. Understanding this will help you interpret your results:
+
+**Coding-Focused Models** (expect stronger performance on coding tests):
+Examples as of June 2025 include `qwen2.5-coder:7b`, `deepseek-coder:6.7b`, `codellama:7b` - models specialized for code generation and programming tasks.
+
+**General-Purpose Models** (balanced performance, often stronger on data analysis):
+Examples as of June 2025 include `mistral-nemo:12b`, `llama3.1:8b`, `qwen2.5:14b`, `gemma2:9b`, `phi3:14b` - models with strong reasoning and instruction following capabilities.
+
+💡 **Note**: The model landscape evolves rapidly. Use `ollama list` to see your locally available models, or browse [ollama.com/library](https://ollama.com/library) for the latest releases.
+
+**Key Considerations:**
+- **Coding tests** favor models trained on code repositories and programming tasks
+- **Data analysis tests** favor models with strong reasoning, pattern recognition, and business communication skills
+- **Model size matters**: Larger models (14B+) generally outperform smaller ones, but take longer to run
+- **Specialization vs. generalization**: Coding models may struggle with business writing; general models may produce less optimal code
+
+💡 **Tip**: Test the same model on both categories to understand its strengths, or compare a coding model vs. general model on the same category to see the specialization effect.
 
 ## Usage Patterns
 
