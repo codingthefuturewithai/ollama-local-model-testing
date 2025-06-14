@@ -1,0 +1,61 @@
+**Business Analysis Report**
+**1. Summary Statistics**
+- **Total Orders:** 10
+- **Revenue:** $2,389.54
+- **Average Order Value (AOV):** $238.95
+*Calculation:*
+- Total revenue: Σ(quantity * unit_price) for all orders = $2,389.54
+- AOV: Total revenue / Total orders = $238.95
+**2. Top 3 Customers by Order Value**
+| Rank | Customer Name        | Total Spent |
+|------|----------------------|------------|
+| 1    | John Smith           | $179.98     |
+| 2    | Lisa Garcia          | $119.96     |
+| 3    | Thomas Anderson      | $34.99      |
+*Calculation:*
+- Total spent by each customer: Σ(quantity * unit_price) for their orders
+- Ranked customers based on total spent
+**3. Product Performance Analysis**
+| Product Name        | Quantity Sold | Revenue Generated |
+|---------------------|---------------|--------------------|
+| Wireless Headphones | 2             | $179.98            |
+| Laptop Stand        | 1             | $45.50             |
+| USB-C Hub           | 3             | $77.97             |
+| Mechanical Keyboard | 1             | $159.99            |
+| Monitor Arm         | 2             | $150.00            |
+| Wireless Mouse      | 4             | $119.96            |
+| Webcam HD           | 1             | $89.95             |
+| Desk Pad            | 2             | $39.98             |
+| Blue Light Glasses   | 1             | $34.99             |
+| Ergonomic Chair     | 1             | $299.99            |
+*Calculation:*
+- Quantity sold: Σquantity for each product
+- Revenue generated: Σ(quantity * unit_price) for each product
+**4. Geographic Distribution of Orders**
+| State   | Total Orders |
+|---------|--------------|
+| MA      | 1             |
+| WA      | 1             |
+| CA      | 2             |
+| TX      | 1             |
+| OR      | 1             |
+| CO      | 1             |
+| IL      | 1             |
+| FL      | 1             |
+| NY      | 1             |
+*Calculation:*
+- Count orders by state
+**5. Order Status Breakdown**
+| Status       | Total Orders |
+|--------------|--------------|
+| Shipped     | 6            |
+| Processing  | 3            |
+| Cancelled   | 1            |
+*Calculation:*
+- Count orders by status
+**6. Notable Patterns or Trends**
+- **New Year's Resolution:** There seems to be a spike in orders for productivity and wellness items such as Mechanical Keyboard, Blue Light Glasses, Ergonomic Chair, and Webcam HD around January 18th.
+- **Customer Loyalty:** John Smith has placed the highest number of orders (2) and spent the most ($179.98), suggesting potential customer loyalty programs could be beneficial.
+- **Product Bundling Opportunity:** Combining products like Wireless Headphones, Laptop Stand, USB-C Hub, Mechanical Keyboard, or Monitor Arm could increase order value and revenue.
+*Analysis:*
+- Observed trends by analyzing product categories, order dates, customer behavior, etc.

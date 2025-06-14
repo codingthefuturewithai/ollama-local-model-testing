@@ -1,0 +1,38 @@
+```python
+def binary_search(sorted_list, target):
+"""
+Perform a binary search on a sorted list to find the index of a given target value.
+Parameters:
+- sorted_list: A list of elements sorted in ascending order.
+- target: The element to be searched for within the sorted_list.
+Returns:
+- The index of the target if found, otherwise -1.
+Complexity Analysis:
+- Best Case Time Complexity: O(1) when the target is at the middle of the list.
+- Average and Worst Case Time Complexity: O(log n), where 'n' is the number of elements in the list.
+Examples:
+>>> binary_search([1, 2, 3, 4, 5], 3)
+2
+>>> binary_search([1, 2, 3, 4, 5], 6)
+-1
+"""
+# Check if the list is empty
+if not sorted_list:
+raise ValueError("The input list must not be empty.")
+left, right = 0, len(sorted_list) - 1
+while left <= right:
+mid = (left + right) // 2
+if sorted_listid] == target:
+return mid
+elif sorted_listid] < target:
+left = mid + 1
+else:
+right = mid - 1
+return -1
+# Example usage:
+if __name__ == "__main__":
+example_list = [1, 2, 3, 4, 5]
+print(binary_search(example_list, 3))  # Output: 2
+print(binary_search(example_list, 6))  # Output: -1
+```
+This implementation of the binary search algorithm efficiently finds the index of a target value within a sorted list using the divide and conquer approach. The function includes error handling for an empty input list and provides a clear docstring with complexity analysis and examples to illustrate its usage and expected outcomes.

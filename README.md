@@ -11,6 +11,41 @@ A YAML-driven testing framework for evaluating any Ollama language model against
 - **Extensible Framework** - Easy to add custom tests and data sources
 - **Comprehensive Analysis** - Performance metrics, automated scoring, detailed reports
 
+## Sample Report
+
+Here's what you can expect from the testing framework - a comprehensive analysis report showing model performance across real-world tasks:
+
+### Example: qwen2.5-coder:7b on Coding Tests
+
+The framework tested the **qwen2.5-coder:7b** model against 7 coding challenges, from algorithm implementation to complex application refactoring. Here are the results:
+
+**Performance Summary:**
+- ⚡ **Average Response Time:** 20.8 seconds  
+- 🔥 **Average Throughput:** 32.3 tokens/second
+- ✅ **Success Rate:** 100% (7/7 tests passed)
+
+**AI Quality Evaluation** (scored by Gemini 2.5 Flash):
+- 🎯 **Correctness:** 8.0/10 - Highly accurate implementations
+- 📋 **Completeness:** 9.3/10 - Thorough, well-structured solutions  
+- ⭐ **Overall Quality:** 7.3/10 - Production-ready code with good practices
+
+**Test Breakdown:**
+| Test | Task | Duration | Tokens/sec | Status |
+|------|------|----------|------------|---------|
+| CT-01 | Binary Search Implementation | 11.3s | 31.6 | ✅ |
+| CT-02 | Performance Optimization | 9.0s | 34.5 | ✅ |
+| CT-03 | Bug Fixing | 16.1s | 33.3 | ✅ |
+| CT-04 | Code Review Analysis | 15.7s | 37.6 | ✅ |
+| CT-05 | Documentation Generation | 20.4s | 32.4 | ✅ |
+| CT-06 | API Integration | 15.8s | 33.4 | ✅ |
+| CT-07 | Complex App Refactoring | 57.0s | 23.1 | ✅ |
+
+📊 **Full Report:** [sample-reports/reports/analysis_20250612_235751.md](sample-reports/reports/analysis_20250612_235751.md)
+
+*Each report links to detailed test results including the original test data, model responses, structured output analysis, and AI evaluation reasoning for every test case.*
+
+This example demonstrates how coding-specialized models excel at programming tasks. The framework also includes data analysis tests where general-purpose models often perform better - helping you understand each model's strengths.
+
 ## Quick Start
 
 ### Prerequisites

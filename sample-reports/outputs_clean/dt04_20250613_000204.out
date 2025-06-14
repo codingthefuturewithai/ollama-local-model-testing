@@ -1,0 +1,42 @@
+**Data Quality Audit Report**
+**1. Data consistency between orders and customer records:**
+- **Consistent**: Most fields match across both datasets.
+- Example: Order ID ORD-2024-001 has the same customer name, email, and other details in both Orders and Customer data.
+- **Inconsistency**:
+- *Customer Name*: In order ORD-2024-05, the customer is listed as "Robert Wilson", but in the Customer data, it's "Bob Wilson".
+- Orders: Robert Wilson
+- Customers: Bob Wilson
+**2. Email references that match or contradict CSV data:**
+- **Match**:
+- The email conversations about order ORD-2024-003 (Mike Chen) match the customer details in both Orders and Customer datasets.
+- **No contradictions**: All emails referenced orders that exist in the Orders dataset with matching customer details.
+**3. Missing or incomplete information:**
+- **Orders**:
+- No missing information in required fields.
+- Optional fields like 'shipping_method' and 'notes_to_driver' are empty for all records, which is expected.
+- **Customers**:
+- *Missing*: 'Address' field is missing for all customers.
+- *Incomplete*: Some records might have incomplete data. For instance, 'total_orders' = 12 but only 3 orders exist for John Smith (ORD-2024-001).
+**4. Potential data entry errors:**
+- **Orders**:
+- In order ORD-2024-005, the 'unit_price' of Monitor Arm is $75.00, but in other orders, it's consistently $79.99.
+- Example: Order ORD-2024-008 has a Monitor Arm with price $79.99.
+- **Customers**:
+- In customer CUST-005, 'total_orders' is listed as 18, but only 3 orders exist for Robert Wilson (ORD-2024-005).
+- Possible error or outdated record.
+**5. Conflicting information across sources:**
+- **None found**: All data in emails matches the corresponding records in Orders and Customer datasets.
+**6. Data quality scores and recommendations:**
+| Metric                   | Score (out of 10) |
+|--------------------------|-------------------|
+| Data Completeness        | 8/10              |
+| Consistency across datasets| 9/10              |
+| Accuracy (no contradictions)| 10/10             |
+| Potential errors         | 6/10              |
+**Recommendations:**
+- Update Customers dataset with 'Address' field.
+- Review and update 'total_orders' in Customers dataset to match the actual number of orders for each customer.
+- Verify the pricing consistency for Monitor Arm across Orders data.
+- Periodically cross-check and update records to maintain accuracy.
+**Data Quality Report Summary:**
+Overall, the datasets are well-structured with minimal errors. However, there are some inconsistencies and potential errors that require review and updating. Addressing these issues will improve the overall quality of the data.
