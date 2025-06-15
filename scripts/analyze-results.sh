@@ -76,6 +76,35 @@ if [[ ! -d "${RESULTS_DIR}" ]] || [[ -z "$(ls -A ${RESULTS_DIR}/*.json 2>/dev/nu
     exit 1
 fi
 
+# Check if this is a standalone run (missing hardware profile)
+hardware_profile_warning() {
+    local timestamp="$1"
+    local hardware_file="${RESULTS_DIR}/hardware_profile_${timestamp}.json"
+    
+    if [[ ! -f "$hardware_file" ]]; then
+        echo -e "${YELLOW}[WARNING]${NC} Hardware profile not found for this test run"
+        echo ""
+        echo "This may indicate that:"
+        echo "1. This analysis is being run on a different machine than where tests were executed"
+        echo "2. Tests were run with an older version that didn't capture hardware profiles"
+        echo "3. Hardware profiling failed during test execution"
+        echo ""
+        echo "The generated report will not include hardware environment information."
+        echo ""
+        echo -n "Continue with analysis? [y/N]: "
+        read -r response
+        
+        if [[ ! "$response" =~ ^[Yy]$ ]]; then
+            echo "Analysis cancelled."
+            exit 0
+        fi
+        echo ""
+        return 1  # Hardware profile missing
+    fi
+    
+    return 0  # Hardware profile available
+}
+
 # Function to detect test run type and get latest timestamp
 get_latest_test_info() {
     local latest_file=$(ls -t "${RESULTS_DIR}"/*.json | head -n 1)
@@ -167,6 +196,12 @@ echo -e "${BLUE}[INFO]${NC} Analyzing results from test run: ${latest_timestamp}
 echo -e "${BLUE}[INFO]${NC} Model: ${model_name}"
 echo -e "${BLUE}[INFO]${NC} Category: ${category}"
 
+# Check for hardware profile and warn if missing
+hardware_available=true
+if ! hardware_profile_warning "$latest_timestamp"; then
+    hardware_available=false
+fi
+
 # Validate we have matching files
 matching_files=$(ls "${RESULTS_DIR}"/*"${latest_timestamp}".json 2>/dev/null | wc -l)
 if [[ $matching_files -eq 0 ]]; then
@@ -192,6 +227,36 @@ with the **${category}** test category using the Interactive Testing Framework v
 - **Test Framework:** Interactive Selection (v2.0)
 - **Timestamp:** ${latest_timestamp}
 
+EOF
+
+# Add hardware environment information if available
+if [[ "$hardware_available" == true ]]; then
+    echo -e "${BLUE}[INFO]${NC} Adding hardware environment information..."
+    hardware_file="${RESULTS_DIR}/hardware_profile_${latest_timestamp}.json"
+    
+    if [[ -f "$hardware_file" ]]; then
+        # Use the hardware profile script to format the hardware info for the report
+        hardware_section=$(python3 scripts/hardware-profile.py --format markdown --from-file "$hardware_file")
+        
+        if [[ $? -eq 0 && -n "$hardware_section" ]]; then
+            echo "$hardware_section" >> "${report_file}"
+            echo "" >> "${report_file}"
+        else
+            echo "### Hardware Environment" >> "${report_file}"
+            echo "*Hardware profile data was captured but could not be formatted for this report.*" >> "${report_file}"
+            echo "" >> "${report_file}"
+        fi
+    fi
+else
+    # Add note about missing hardware profile
+    cat >> "${report_file}" << 'EOF'
+### Hardware Environment
+*⚠️ Hardware profile not available - analysis may be running on different machine than test execution*
+
+EOF
+fi
+
+cat >> "${report_file}" << 'EOF'
 ## Test Execution Overview
 
 EOF
@@ -316,16 +381,21 @@ if [[ "$QUALITATIVE_EVAL" == true ]]; then
             echo "    \"category\": \"${category}\""
             echo "  },"
             echo "  \"summary\": {"
-            echo "    \"total_tests\": $(ls ${RESULTS_DIR}/*${latest_timestamp}.json | wc -l | xargs)"
+            echo "    \"total_tests\": $(ls ${RESULTS_DIR}/*${latest_timestamp}.json | grep -v "hardware_profile" | wc -l | xargs)"
             echo "  },"
             echo "  \"results\": {"
             
-            # Process each test result file
+            # Process each test result file (exclude hardware profile)
             first_file=true
             for result_file in "${RESULTS_DIR}"/*"${latest_timestamp}".json; do
+                # Skip hardware profile file
+                if [[ "$(basename "$result_file")" == "hardware_profile_${latest_timestamp}.json" ]]; then
+                    continue
+                fi
+                
                 if [[ -f "$result_file" ]]; then
                     test_id=$(jq -r '.test_case.id' "$result_file" 2>/dev/null || echo "unknown")
-                    if [[ "$test_id" != "unknown" ]]; then
+                    if [[ "$test_id" != "unknown" && "$test_id" != "null" ]]; then
                         if [[ "$first_file" != true ]]; then
                             echo ","
                         fi

@@ -408,6 +408,19 @@ main() {
         exit 1
     fi
 
+    # Capture hardware profile at test start
+    echo -e "${BLUE}[INFO]${NC} Capturing hardware profile..."
+    log "Capturing hardware profile"
+    
+    if python3 scripts/hardware-profile.py --format json --output "${RESULTS_DIR}/hardware_profile_${TIMESTAMP}.json"; then
+        echo -e "${GREEN}[SUCCESS]${NC} Hardware profile captured"
+        log "Hardware profile captured successfully"
+    else
+        echo -e "${YELLOW}[WARNING]${NC} Failed to capture hardware profile, continuing without it"
+        log "WARNING: Hardware profile capture failed"
+    fi
+    echo ""
+
     # Check if configuration loader exists
     if [[ ! -f "${CONFIG_LOADER}" ]]; then
         echo -e "${RED}[ERROR]${NC} Configuration loader not found: ${CONFIG_LOADER}"

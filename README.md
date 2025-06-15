@@ -2,6 +2,12 @@
 
 A YAML-driven testing framework for evaluating any Ollama language model against real-world coding and data analysis tasks. Test any model with consistent, extensible, configuration-based test scenarios.
 
+> **⚠️ PLATFORM COMPATIBILITY**  
+> **Currently supports:** macOS and Linux only  
+> **Windows support:** Planned for a future release  
+> 
+> The framework uses shell scripts and Unix-style commands that are not yet compatible with Windows environments.
+
 ## Key Features
 
 - **Universal Model Support** - Test any locally available Ollama model
@@ -11,40 +17,80 @@ A YAML-driven testing framework for evaluating any Ollama language model against
 - **Extensible Framework** - Easy to add custom tests and data sources
 - **Comprehensive Analysis** - Performance metrics, automated scoring, detailed reports
 
-## Sample Report
+## Sample Reports
 
-Here's what you can expect from the testing framework - a comprehensive analysis report showing model performance across real-world tasks:
+Here's what you can expect from the testing framework - comprehensive analysis reports showing model performance across real-world tasks:
 
-### Example: qwen2.5-coder:7b on Coding Tests
+### Example 1: devstral:24b on Coding Tests
 
-The framework tested the **qwen2.5-coder:7b** model against 7 coding challenges, from algorithm implementation to complex application refactoring. Here are the results:
+The framework tested the **devstral:24b** model against 7 coding challenges, from algorithm implementation to complex application refactoring.
+
+**Hardware Environment:**
+- **System:** Darwin arm64
+- **CPU:** 16 cores
+- **Memory:** 128.0 GB total, 60.31 GB available
+- **GPU:** Apple M3 Max (integrated), 40 cores, Metal 3
+- **Ollama Acceleration:** Metal (Apple Silicon)
 
 **Performance Summary:**
-- ⚡ **Average Response Time:** 20.8 seconds  
-- 🔥 **Average Throughput:** 32.3 tokens/second
-- ✅ **Success Rate:** 100% (7/7 tests passed)
+- ⚡ **Average Response Time:** 100.2 seconds  
+- 🔥 **Average Throughput:** 10.0 tokens/second
+- ✅ **Success Rate:** 86% (6/7 tests passed)
 
 **AI Quality Evaluation** (scored by Gemini 2.5 Flash):
-- 🎯 **Correctness:** 8.0/10 - Highly accurate implementations
-- 📋 **Completeness:** 9.3/10 - Thorough, well-structured solutions  
-- ⭐ **Overall Quality:** 7.3/10 - Production-ready code with good practices
+- 🎯 **Correctness:** 7.0/10 - Solid implementations with some issues
+- 📋 **Completeness:** 7.9/10 - Generally thorough solutions  
+- ⭐ **Overall Quality:** 6.6/10 - Good code with room for improvement
 
 **Test Breakdown:**
 | Test | Task | Duration | Tokens/sec | Status |
 |------|------|----------|------------|---------|
-| CT-01 | Binary Search Implementation | 11.3s | 31.6 | ✅ |
-| CT-02 | Performance Optimization | 9.0s | 34.5 | ✅ |
-| CT-03 | Bug Fixing | 16.1s | 33.3 | ✅ |
-| CT-04 | Code Review Analysis | 15.7s | 37.6 | ✅ |
-| CT-05 | Documentation Generation | 20.4s | 32.4 | ✅ |
-| CT-06 | API Integration | 15.8s | 33.4 | ✅ |
-| CT-07 | Complex App Refactoring | 57.0s | 23.1 | ✅ |
+| CT-01 | Binary Search Implementation | 37.4s | 15.0 | ✅ |
+| CT-02 | Performance Optimization | 38.7s | 12.8 | ✅ |
+| CT-03 | Bug Fixing | 80.2s | 11.0 | ✅ |
+| CT-04 | Code Review Analysis | 68.4s | 12.0 | ✅ |
+| CT-05 | Documentation Generation | 67.4s | 7.8 | ✅ |
+| CT-06 | API Integration | 120.0s | 4.6 | ❌ |
+| CT-07 | Complex App Refactoring | 289.0s | 6.9 | ✅ |
 
-📊 **Full Report:** [sample-reports/reports/analysis_20250612_235751.md](sample-reports/reports/analysis_20250612_235751.md)
+📊 **Full Report:** [sample-reports/reports/analysis_20250614_155309.md](sample-reports/reports/analysis_20250614_155309.md)
+
+### Example 2: mistral-nemo:12b on Data Analysis Tests
+
+The framework tested the **mistral-nemo:12b** model against 6 data analysis challenges, from CSV processing to executive reporting.
+
+**Hardware Environment:**
+- **System:** Darwin arm64
+- **CPU:** 16 cores
+- **Memory:** 128.0 GB total, 57.95 GB available
+- **GPU:** Apple M3 Max (integrated), 40 cores, Metal 3
+- **Ollama Acceleration:** Metal (Apple Silicon)
+
+**Performance Summary:**
+- ⚡ **Average Response Time:** 25.8 seconds  
+- 🔥 **Average Throughput:** 20.1 tokens/second
+- ✅ **Success Rate:** 100% (6/6 tests passed)
+
+**AI Quality Evaluation** (scored by Gemini 2.5 Flash):
+- 🎯 **Correctness:** 4.7/10 - Basic accuracy with significant gaps
+- 📋 **Completeness:** 7.8/10 - Well-structured responses  
+- ⭐ **Overall Quality:** 5.5/10 - Adequate solutions needing refinement
+
+**Test Breakdown:**
+| Test | Task | Duration | Tokens/sec | Status |
+|------|------|----------|------------|---------|
+| DT-01 | CSV Data Analysis | 14.4s | 24.6 | ✅ |
+| DT-02 | Email Thread Correlation | 13.3s | 24.0 | ✅ |
+| DT-03 | Multi-source Data Fusion | 35.0s | 17.3 | ✅ |
+| DT-04 | Data Validation | 28.2s | 20.0 | ✅ |
+| DT-05 | Executive Report Generation | 25.6s | 17.1 | ✅ |
+| DT-06 | Pattern Recognition & Trend Analysis | 38.1s | 17.7 | ✅ |
+
+📊 **Full Report:** [sample-reports/reports/analysis_20250615_081047.md](sample-reports/reports/analysis_20250615_081047.md)
 
 *Each report links to detailed test results including the original test data, model responses, structured output analysis, and AI evaluation reasoning for every test case.*
 
-This example demonstrates how coding-specialized models excel at programming tasks. The framework also includes data analysis tests where general-purpose models often perform better - helping you understand each model's strengths.
+These examples demonstrate how different models perform across task categories - specialized coding models may excel at programming tasks but struggle with business analysis, while general-purpose models show balanced performance. The framework helps you understand each model's strengths and weaknesses.
 
 ## Quick Start
 
@@ -74,6 +120,23 @@ ollama pull qwen2.5-coder:7b
 ```
 
 **Setup Python Environment:**
+
+**Option 1: Using uv (Recommended)**
+```bash
+# Install uv if you don't have it (fast Python package manager)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Create and activate virtual environment + install dependencies in one step
+uv venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+uv pip install -r requirements.txt
+
+# Setup environment file for AI evaluation features
+cp .env.example .env
+# Add your GOOGLE_API_KEY to .env for automated scoring
+```
+
+**Option 2: Using pip (Traditional)**
 ```bash
 # Create and activate virtual environment (recommended)
 python3 -m venv venv

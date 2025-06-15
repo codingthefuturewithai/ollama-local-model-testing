@@ -1,0 +1,44 @@
+**Business Report: Orders Analysis**
+**1. Summary Statistics**
+- Total orders: 10
+- Total revenue: $2,379.84
+- Average order value (AOV): $237.98
+**2. Top 3 Customers by Order Value**
+| Customer Name | Email                     | Total Spent |
+|---------------|----------------------------|------------|
+| Mike Chen     | m.chen@techcorp.com       | $77.97     |
+| John Smith    | john.smith@email.com     | $179.98    |
+| Lisa Garcia   | lisa.garcia@design.com   | $123.96    |
+**3. Product Performance Analysis**
+*Best-selling products by quantity:*
+- Wireless Headphones: 2 units
+- USB-C Hub: 3 units
+*Products with highest revenue:*
+- Mechanical Keyboard: $159.99
+- Ergonomic Chair: $299.99
+**4. Geographic Distribution of Orders**
+| City           | State   | Total Orders |
+|----------------|---------|---------------|
+| Boston         | MA      | 1              |
+| Seattle        | WA      | 1              |
+| San Francisco  | CA      | 1              |
+| Austin         | TX      | 1              |
+| Denver         | CO      | 1              |
+| Portland       | OR      | 1              |
+| Chicago        | IL      | 1              |
+| Miami          | FL      | 1              |
+| New York       | NY      | 1              |
+| Los Angeles    | CA      | 1              |
+**5. Order Status Breakdown**
+- Shipped: 6 (60%)
+- Processing: 3 (30%)
+- Cancelled: 1 (10%)
+**6. Notable Patterns and Trends**
+- *Order Timing*: Most orders were placed on January 17th and 18th.
+- *Popular Products*: Wireless Headphones, Mechanical Keyboard, and Ergonomic Chair had the highest revenue.
+- *Order Status*: A majority of orders (60%) have been shipped, while a significant portion is still processing (30%).
+- *Geographic Concentration*: Although orders were spread across different states, California had the most orders with 2 out of 10.
+**Recommendations:**
+- Monitor the "processing" orders to ensure they are fulfilled promptly.
+- Consider promoting best-selling products like Wireless Headphones and Mechanical Keyboard to encourage repeat purchases.
+- Expand marketing efforts in states with fewer orders to increase reach and potential customer base.

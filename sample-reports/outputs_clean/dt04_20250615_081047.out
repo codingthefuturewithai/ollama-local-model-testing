@@ -1,0 +1,41 @@
+**Data Quality Audit Report**
+**1. Data consistency between orders and customer records:**
+- *Consistent:*
+- `ORD-2024-001` (John Smith)
+- `ORD-2024-002` (Sarah Johnson)
+- `ORD-2024-003` (Mike Chen)
+- `ORD-2024-009` (Thomas Anderson)
+- *Inconsistent:*
+- For `ORD-2024-006`, Lisa Garcia's email in the orders data is `lisa.garcia@design.com`, but her customer ID is missing, and there's no matching record in the customer data with that email.
+- For `ORD-2024-010`, Maria Rodriguez's email in the orders data is `maria.r@creative.studio`, but her customer ID is missing, and there's no matching record in the customer data with that email.
+**2. Email references that match or contradict CSV data:**
+- *Matching:*
+- The emails regarding `ORD-2024-003` (Mike Chen) confirm the order details and shipping status.
+- No other orders mentioned in the emails are present in the orders data, so no contradiction found.
+**3. Missing or incomplete information:**
+- *Orders Data:*
+- Shipping method and estimated delivery date are missing for all orders.
+- Payment method and payment status are not provided for any order.
+- Discounts or taxes are not mentioned in any order.
+- *Customer Data:*
+- Address and city/state/country information is missing for all customers.
+- Loyalty points or rewards history is not provided.
+**4. Potential data entry errors:**
+- In the orders data, `ORD-2024-008` has a quantity of 2 but no unit price listed. This could indicate an error in data entry.
+- In the customer data, there are duplicate entries for Mike Chen (`CUST-003`, `CUST-005`) with different customer IDs but identical details except for total_orders and total_spent.
+**5. Conflicting information across sources:**
+- There's no contradiction found between orders data, customer records, and email references.
+**6. Data quality scores and recommendations:**
+| Category         | Orders Data Score (out of 10) | Customer Data Score (out of 10) |
+|------------------|-----------------------------|--------------------------------|
+| Completeness     | 7                           | 8                             |
+| Accuracy         | 9                           | 8                             |
+| Consistency      | 8                           | 7                             |
+| Format/Structure | 10                          | 10                            |
+| **Total**        | **34**                      | **35**                        |
+*Recommendations:*
+- Ensure all required fields are completed during data entry for both orders and customer records.
+- Implement data validation checks to prevent duplicate entries or inconsistencies between datasets.
+- Consider standardizing email formats for better matching consistency between orders and customer records.
+- Include shipping method, estimated delivery date, payment method/status, discounts/taxes in the orders data.
+- Add address information and loyalty history to the customer data.

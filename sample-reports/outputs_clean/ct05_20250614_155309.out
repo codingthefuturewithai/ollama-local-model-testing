@@ -1,0 +1,64 @@
+# Fibonacci Function API Documentation
+## Function Definition
+```python
+def fibonacci(n: int) -> list[int]:
+"""Calculate the first n Fibonacci numbers.
+The function computes and returns a list containing the first `n` Fibonacci numbers.
+The Fibonacci sequence is defined as:
+- F(0) = 0
+- F(1) = 1
+- For n > 1: F(n) = F(n-1) + F(n-2)
+Args:
+n (int): The number of Fibonacci numbers to generate. Must be a non-negative integer.
+Returns:
+list[int]: A list containing the first `n` Fibonacci numbers.
+If `n` is 0, returns an empty list.
+Examples:
+>>> fibonacci(0)
+[]
+>>> fibonacci(1)
+[0]
+>>> fibonacci(2)
+[0, 1]
+>>> fibonacci(5)
+[0, 1, 1, 2, 3]
+Time Complexity: O(n) - The function iterates n-2 times to compute the sequence.
+Space Complexity: O(n) - The function stores all n Fibonacci numbers in a list.
+Note:
+This implementation uses an iterative approach for better performance
+compared to recursive approaches, especially for larger values of `n`.
+"""
+if n <= 0:
+return []
+elif n == 1:
+return [0]
+elif n == 2:
+return [0, 1]
+fib = [0, 1]
+for i in range(2, n):
+fib.append(fib[i-1] + fib[i-2])
+return fib
+```
+## Usage Examples
+```python
+# Example usage of the fibonacci function:
+print(fibonacci(0))   # Output: []
+print(fibonacci(1))   # Output: [0]
+print(fibonacci(2))   # Output: [0, 1]
+print(fibonacci(5))   # Output: [0, 1, 1, 2, 3]
+print(fibonacci(10))  # Output: [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+```
+## Time and Space Complexity Analysis
+### Time Complexity:
+- The time complexity of this implementation is O(n). This is because the function uses a loop that runs n-2 times to compute the Fibonacci sequence up to the nth term.
+### Space Complexity:
+- The space complexity is also O(n), as the algorithm stores all n Fibonacci numbers in a list.
+## Potential Improvements or Alternative Approaches
+1. **Generator Implementation**:
+- Instead of returning a list, you could implement this function as a generator that yields Fibonacci numbers one at a time, which would save memory for large values of `n`.
+2. **Memoization/Caching**:
+- For applications requiring multiple computations with the same n, memoizing results could improve performance by storing previously computed values.
+3. **Matrix Exponentiation**:
+- For extremely large values of `n`, using matrix exponentiation can significantly reduce time complexity to O(log n), though this approach is more complex to implement and generally used in scenarios where efficiency at scale is critical.
+4. **Recursive with Memoization**:
+- A recursive implementation with memoization could provide a clean, readable solution while maintaining good performance characteristics.

@@ -1,0 +1,94 @@
+Here's a Python class that meets all the specified requirements:
+```python
+import requests
+import logging
+from typing import Any, Dict, Optional, Union
+import time
+class UserManagementAPI:
+"""
+A class to interact with the user management REST API.
+Attributes:
+base_url (str): The base URL of the API.
+api_key (str): The API key for authentication.
+"""
+def __init__(self, base_url: str, api_key: str):
+"""
+Initializes the UserManagementAPI with a base URL and an API key.
+Args:
+base_url (str): The base URL of the API.
+api_key (str): The API key for authentication.
+"""
+self.base_url = base_url
+self.api_key = api_key
+self.headers = {
+'Content-Type': 'application/json',
+'X-API-Key': self.api_key
+}
+logging.basicConfig(level=logging.DEBUG)
+def _request(self, method: str, endpoint: str, data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+"""
+Makes a request to the API.
+Args:
+method (str): The HTTP method ('GET', 'POST', 'PUT', 'DELETE').
+endpoint (str): The API endpoint.
+data (Optional[Dict[str, Any]]): The JSON data to send in the body of the request.
+Returns:
+Dict[str, Any]: The JSON response from the API.
+Raises:
+requests.exceptions.RequestException: For any errors during the HTTP request.
+"""
+url = f"{self.base_url}/{endpoint}"
+try:
+logging.debug(f"Requesting {method} {url}")
+response = requests.request(
+method=method,
+url=url,
+headers=self.headers,
+json=data
+)
+response.raise_for_status()
+return response.json()
+except requests.exceptions.HTTPError as http_err:
+logging.error(f"HTTP error occurred: {http_err}")
+raise
+except Exception as err:
+logging.error(f"An error occurred: {err}")
+raise
+def get_user(self, user_id: str) -> Dict[str, Any]:
+"""
+Retrieves a user by ID.
+Args:
+user_id (str): The ID of the user to retrieve.
+Returns:
+Dict[str, Any]: The JSON response from the API.
+"""
+return self._request("GET", f"{user_id}")
+def create_user(self, data: Dict[str, Any]) -> Dict[str, Any]:
+"""
+Creates a new user.
+Args:
+data (Dict[str, Any]): The JSON data for the new user.
+Returns:
+Dict[str, Any]: The JSON response from the API.
+"""
+return self._request("POST", "", data)
+def update_user(self, user_id: str, data: Dict[str, Any]) -> Dict[str, Any]:
+"""
+Updates an existing user by ID.
+Args:
+user_id (str): The ID of the user to update.
+data (Dict[str, Any]): The JSON data for updating the user.
+Returns:
+Dict[str, Any]: The JSON response from the API.
+"""
+return self._request("PUT", f"{user_id}", data)
+def delete_user(self, user_id: str) -> None:
+"""
+Deletes a user by ID.
+Args:
+user_id (str): The ID of the user to delete.
+"""
+self._request("DELETE", f"{user_id}")
+```
+This implementation includes:
+1. Methods for GET,

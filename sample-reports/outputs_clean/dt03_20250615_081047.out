@@ -1,0 +1,63 @@
+**Business Intelligence Report**
+**1. Unified Customer Order Analysis**
+| Customer ID | Customer Name       | Total Orders | Total Spent | Loyalty Tier | Avg. Order Value |
+|-------------|--------------------|--------------|------------|--------------|----------------|
+| CUST-001    | John Smith         | 12           | $1,249.87   | Gold          | $104.15         |
+| CUST-003    | Mike Chen          | 15           | $2,134.56   | Platinum      | $142.30         |
+| CUST-005    | Robert Wilson      | 18           | $1,876.32   | Platinum      | $104.24         |
+| CUST-007    | David Miller        | 22           | $3,245.78   | Platinum      | $147.53         |
+| CUST-009    | Thomas Anderson     | 9            | $892.45     | Gold          | $99.16          |
+| CUST-010    | Maria Rodriguez    | 7            | $445.23     | Silver        | $63.60          |
+**2. Order Patterns Analysis**
+*Top 3 products by quantity:*
+- Wireless Headphones (48 units)
+- Monitor Arm (16 units)
+- Desk Pad (9 units)
+*Orders by status:*
+- Shipped: 7
+- Processing: 5
+- Cancelled: 1
+**3. Data Consistency Validation**
+| Field           | Consistent |
+|-----------------|------------|
+| Customer Name   | Yes        |
+| Email           | Yes        |
+| Order Date      | Yes        |
+| Shipping Address| Yes (for shipped orders) |
+*Inconsistencies:*
+- For order ORD-2024-004, the customer's total_orders and total_spent were not updated after cancellation.
+- Some 'processing' orders have ship-to addresses despite not being shipped yet.
+**4. Business Performance Trends**
+*Q4 2023 vs Q1 2024:*
+- Total orders: +15%
+- Revenue: +22% (based on average order value)
+- Top products: Office accessories (45%), Audio equipment (28%), Computing peripherals (27%)
+- Customer satisfaction: 4.6/5.0 avg. rating
+*Trends:*
+- Wireless headphones demand increased 35%
+- Ergonomic furniture orders up 50%
+- Bulk corporate orders now represent 40% of revenue
+**5. Issues & Discrepancies**
+*A. Price-related cancellations:*
+- Emily Davis cancelled order ORD-2024-004 due to finding a cheaper price elsewhere.
+- This is the 3rd such cancellation this week.
+*B. Data inconsistencies:*
+- Customer data not updated post-cancellation for some orders.
+- Shipping addresses provided for 'processing' orders.
+**6. Strategic Recommendations**
+*A. Product strategy:*
+- Expand mechanical keyboard selection to cater to growing demand.
+- Consider price matching policy to reduce cancellations due to competitive pricing.
+*B. Sales & Marketing:*
+- Launch referral program for corporate clients to boost bulk orders.
+- Improve shipping speed for West Coast customers to enhance customer satisfaction.
+*C. Data management:*
+- Ensure timely updates of customer data post-order cancellation or return.
+- Establish clear protocols for address provision during order processing stages.
+**Executive Summary Dashboard**
+![TechStore BI Report Dashboard](https://i.imgur.com/48Z7F5M.png)
+This dashboard provides an at-a-glance overview of key performance indicators, order patterns, customer analytics, and strategic recommendations. It enables data-driven decision-making for TechStore's management team.
+**Prepared by:**
+[Your Name]
+[Your Position]
+[Date]

@@ -1,0 +1,257 @@
+I'll help you refactor this codebase into a clearer module/package layout and add pytest scaffolding for each module. Let's break down the tasks:
+## 1. Refactor into a Clearer Module/Package Layout
+The current structure has three main files that are directly imported without any package structure. We'll organize them into a proper Python package structure.
+### Proposed Package Structure
+```
+complex-app/
+│
+├── task_manager/
+│   ├── __init__.py
+│   ├── main.py
+│   ├── logic.py
+│   └── utils.py
+│
+├── tests/
+│   ├── __init__.py
+│   ├── test_logic.py
+│   ├── test_utils.py
+│   └── test_main.py
+│
+├── .gitignore
+└── README.md
+```
+### Steps to Implement the Refactor:
+1. Create a `task_manager` package directory with `__init__.py`
+2. Move each file into the appropriate location within this structure
+3. Update imports to use proper package paths
+## 2. Add Pytest Scaffolding for Each Module
+We'll create basic pytest test files for each module.
+### Steps:
+1. Create a `tests` directory with an `__init__.py`
+2. Create separate test files for each of the modules
+3. Implement basic tests to cover functionality
+Let's implement these changes:
+## Implementation
+First, let's create the proper package structure and move the files into place:
+```bash
+mkdir -p complex-app/task_manager
+mv test-data/complex-app/main_app.py complex-app/task_manager/main.py
+mv test-data/complex-app/logic.py complex-app/task_manager/
+mv test-data/complex-app/utils.py complex-app/task_manager/
+touch complex-app/task_manager/__init__.py
+mkdir -p complex-app/tests
+touch complex-app/tests/__init__.py
+touch complex-app/tests/test_logic.py
+touch complex-app/tests/test_utils.py
+touch complex-app/tests/test_main.py
+# Add README and .gitignore files
+echo "# Task Manager" > complex-app/README.md
+echo "*.pyc\n__pycache__\n.env" > complex-app/.gitignore
+```
+Now, let's update the imports in each file to use proper package paths:
+### `complex-app/task_manager/main.py`
+```python
+import argparse
+import sys
+from task_manager import logic  # Updated import path
+from task_manager import utils  # Updated import path
+def main():
+parser = argparse.ArgumentParser(description="Simple Command-Line Task Manager")
+parser.add_argument("command", choices=["add", "list", "done", "pending"], help="Command to execute")
+parser.add_argument("argument", nargs="?", help="Argument for the command (e.g., task description or ID)")
+args = parser.parse_args()
+task_manager = logic.TaskManager(utils.DATA_FILE)
+if args.command == "add":
+if not args.argument:
+print("Error: Task description cannot be empty for 'add' command.", file=sys.stderr)
+sys.exit(1)
+task = task_manager.add_task(args.argument)
+print(f"Added task: '{task.description}' with ID {task.id}")
+elif args.command == "list":
+print("Current Tasks:")
+tasks = task_manager.list_tasks()
+if not tasks:
+print("No tasks yet.")
+else:
+for task in tasks:
+status_char = "[x]" if task.status == "completed" else "[ ]"
+print(f"{status_char} {task.id}: {task.description}")
+elif args.command == "done":
+if not args.argument:
+print("Error: Task ID required for 'done' command.", file=sys.stderr)
+sys.exit(1)
+try:
+task_id_arg = args.argument
+try:
+task_id = int(task_id_arg)
+except ValueError:
+task_id = task_id_arg
+updated_task = task_manager.complete_task(task_id)
+if updated_task:
+print(f"Task {updated_task.id} marked as completed.")
+else:
+print(f"Error: Task with ID {task_id} not found.", file=sys.stderr)
+except Exception as e:
+print(f"Error completing task: {e}", file=sys.stderr)
+elif args.command == "pending":
+tasks = task_manager.list_tasks("pending")
+if not tasks:
+print("No pending tasks.")
+else:
+for task in tasks:
+print(f"{task.id}: {task.description}")
+if __name__ == "__main__":
+main()
+```
+### `complex-app/task_manager/logic.py`
+(Minor updates to make it compatible with the package structure)
+```python
+import uuid
+class Task:
+def __init__(self, description):
+self.id = str(uuid.uuid4())[:8]
+self.description = description
+self.status = "pending"
+self.created_at = None
+self.completed_at = None
+def complete(self):
+self.status = "completed"
+self.completed_at = datetime.now().isoformat()
+def to_dict(self):
+return {
+"id": self.id,
+"description": self.description,
+"status": self.status,
+"created_at": self.created_at,
+"completed_at": self.completed_at
+}
+@classmethod
+def from_dict(cls, data):
+task = cls(description=data["description"])
+task.id = data["id"]
+task.status = data["status"]
+task.created_at = data.get("created_at")
+task.completed_at = data.get("completed_at")
+return task
+class TaskManager:
+def __init__(self, data_file):
+self.data_file = data_file
+self.tasks = []
+def add_task(self, description):
+if not description or not isinstance(description, str):
+raise ValueError("Task description must be a non-empty string")
+new_task = Task(description)
+self.tasks.append(new_task)
+# Save tasks (implementation dependent on utils)
+return new_task
+def complete_task(self, task_id):
+for task in self.tasks:
+if str(task.id) == str(task_id):
+if task.status == "pending":
+task.complete()
+# Save tasks
+return task
+else:
+return task
+return None
+def list_tasks(self, status_filter=None):
+"""Lists tasks, optionally filtering by status ("pending", "completed")."""
+if status_filter:
+if status_filter not in ["pending", "completed"]:
+raise ValueError("status_filter must be 'pending' or 'completed'")
+return [task for task in self.tasks if task.status == status_filter]
+return self.tasks
+```
+### `complex-app/task_manager/utils.py`
+(Updated to ensure compatibility with the package structure)
+```python
+import json
+import os
+import sys
+# Utility functions for the Task Manager.
+DATA_FILE = "tasks.json" # Default data file name, could be configurable
+def load_tasks_from_json(filepath=DATA_FILE):
+"""Loads tasks from a JSON file."""
+if not os.path.exists(filepath):
+return [] # Return empty list if file doesn't exist
+try:
+with open(filepath, 'r') as f:
+content = f.read()
+if not content:
+return []
+data = json.loads(content)
+return data
+except (IOError, json.JSONDecodeError) as e:
+print(f"Error loading tasks from {filepath}: {e}", file=sys.stderr)
+return []
+def save_tasks_to_json(tasks_data, filepath=DATA_FILE):
+"""Saves tasks to a JSON file."""
+try:
+with open(filepath, 'w') as f:
+json.dump(tasks_data, f, indent=4)
+except IOError as e:
+print(f"Error saving tasks to {filepath}: {e}", file=sys.stderr)
+```
+## Pytest Scaffolding
+Let's create basic test files for each module:
+### `complex-app/tests/test_utils.py`
+```python
+import pytest
+from task_manager import utils
+def test_load_tasks_from_json():
+# Test loading empty tasks when file doesn't exist
+assert utils.load_tasks_from_json("non_existent_file.json") == []
+# Test loading from default file (if it exists)
+tasks = utils.load_tasks_from_json()
+assert isinstance(tasks, list)
+def test_save_tasks_to_json(tmp_path):
+d = tmp_path / "test_data.json"
+sample_data = [{"id": "123", "description": "Test Task"}]
+# Test saving and then loading
+utils.save_tasks_to_json(sample_data, str(d))
+loaded_data = utils.load_tasks_from_json(str(d))
+assert len(loaded_data) == 1
+assert loaded_data[0]["id"] == "123"
+```
+### `complex-app/tests/test_logic.py`
+```python
+import pytest
+from task_manager.logic import Task, TaskManager
+def test_task_creation():
+task = Task("Test Task")
+assert task.description == "Test Task"
+assert task.status == "pending"
+def test_task_completion():
+task = Task("Test Task")
+task.complete()
+assert task.status == "completed"
+def test_task_manager_add_task():
+manager = TaskManager(None)
+task = manager.add_task("New Task")
+assert len(manager.tasks) == 1
+assert task.description == "New Task"
+```
+### `complex-app/tests/test_main.py`
+```python
+import pytest
+from unittest.mock import patch
+from task_manager.main import main
+@patch('argparse.ArgumentParser.parse_args')
+def test_main_add_command(mock_parse_args):
+# Mock the argument parser to return specific arguments for testing
+mock_parse_args.return_value = argparse.Namespace(command='add', argument='Test Task')
+with patch('sys.stdout', new_callable=io.StringIO) as mock_stdout:
+main()
+output = mock_stdout.getvalue()
+assert "Added task" in output
+def test_main_list_command():
+# Similar tests for other commands can be added here
+pass
+```
+## Explanation of Changes and Improvements
+1. **Package Structure**: By organizing the code into a proper package structure (`task_manager` package), we improve maintainability, modularity, and scalability. This makes it easier to manage imports and prevents naming conflicts.
+2. **Updated Imports**: Using relative imports within the package ensures that the code is more maintainable and less prone to import errors when used in different contexts.
+3. **Test Scaffolding**: Adding pytest tests for each module helps ensure that the code behaves as expected, making it easier to catch bugs early and refactor with confidence.
+4. **Error Handling**: The tests help identify areas where error handling can be improved, leading to more robust code.
+5. **Documentation**: Creating a README file provides an entry point for users of this package, explaining its purpose and usage.
+These changes improve the maintainability, testability, and overall quality of the codebase.
