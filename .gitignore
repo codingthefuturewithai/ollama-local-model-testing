@@ -49,8 +49,8 @@ node_modules/
 ehthumbs.db
 Thumbs.db
 
-# Keep Directory Structure (allow empty directories to be tracked)
-!outputs/.gitkeep
-!outputs_clean/.gitkeep
-!reports/.gitkeep
-!results/.gitkeep
+# Runtime-generated directories (created dynamically by scripts)
+outputs/
+outputs_clean/
+reports/
+results/
