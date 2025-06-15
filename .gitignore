@@ -1,14 +1,10 @@
 # Ollama Model Testing - Git Ignore Rules
 
-# Test Outputs (Generated Data)
-outputs/*.out
-outputs_clean/*.out
-
-# Generated Reports and Results
-reports/*.md
-reports/*.html
-reports/*.json
-results/*.json
+# Runtime-generated directories (created dynamically by scripts)
+outputs/
+outputs_clean/
+reports/
+results/
 
 # Logs and Temporary Files
 *.log
@@ -48,9 +44,3 @@ node_modules/
 .Trashes
 ehthumbs.db
 Thumbs.db
-
-# Runtime-generated directories (created dynamically by scripts)
-outputs/
-outputs_clean/
-reports/
-results/
