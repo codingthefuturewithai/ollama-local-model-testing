@@ -1,13 +1,13 @@
 Configuration-Driven Testing Framework - Test Summary
-Test Run ID: config_driven_mistral_nemo_12b_data_20250613_000204
+Test Run ID: config_driven_mistral_nemo_12b_data_20250615_081047
 Model: mistral-nemo:12b
 Category: data
-Execution Date: Fri Jun 13 00:04:53 EDT 2025
+Execution Date: Sun Jun 15 08:13:26 EDT 2025
 
 Files Generated:
-- Output files: outputs/*_20250613_000204.out
-- Result files: results/*_20250613_000204.json
-- Log file: results/test_execution_20250613_000204.log
+- Output files: outputs/*_20250615_081047.out
+- Result files: results/*_20250615_081047.json
+- Log file: results/test_execution_20250615_081047.log
 
 Next Steps:
 1. Review output files for model responses
